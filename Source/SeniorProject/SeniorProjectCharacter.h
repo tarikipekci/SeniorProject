@@ -39,7 +39,10 @@ class ASeniorProjectCharacter : public ACharacter
 
 public:
 	ASeniorProjectCharacter();
-	
+
+protected:
+	UPROPERTY(BlueprintReadWrite)
+	class URPlayerStatComponent* PlayerStatComp;
 
 protected:
 
