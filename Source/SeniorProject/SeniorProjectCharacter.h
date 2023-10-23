@@ -20,7 +20,7 @@ class ASeniorProjectCharacter : public ACharacter
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
-	
+
 	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputMappingContext* DefaultMappingContext;
@@ -43,20 +43,33 @@ public:
 protected:
 	UPROPERTY(BlueprintReadWrite)
 	class URPlayerStatComponent* PlayerStatComp;
+	
+	bool bIsSprinting;
+	FTimerHandle SprintingHandle;
+	float StaminaDecrementTimerDuration;
+	float JumpStaminaCost;
 
 protected:
-
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
 
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
-			
+
+	UFUNCTION(BlueprintCallable)
+	void StartSprinting();
+
+	UFUNCTION(BlueprintCallable)
+	void StopSprinting();
+
+	void HandleSprinting();
+
+	void AttemptJump();
 
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	
+
 	// To add mapping context
 	virtual void BeginPlay();
 
@@ -66,4 +79,3 @@ public:
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 };
-

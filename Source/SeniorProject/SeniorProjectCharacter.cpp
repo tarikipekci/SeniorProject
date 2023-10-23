@@ -1,7 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "RPlayerStatComponent.h"
 #include "SeniorProjectCharacter.h"
+#include "RPlayerStatComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
@@ -10,6 +10,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "TimerManager.h"
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -19,7 +20,7 @@ ASeniorProjectCharacter::ASeniorProjectCharacter()
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
-		
+
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -45,10 +46,14 @@ ASeniorProjectCharacter::ASeniorProjectCharacter()
 
 	// Create a follow camera
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
-	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
+	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
+	// Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
 	PlayerStatComp = CreateDefaultSubobject<URPlayerStatComponent>("PlayerStatComponent");
+	bIsSprinting = false;
+	StaminaDecrementTimerDuration = 0.1f;
+	JumpStaminaCost = 25.0f;
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
@@ -60,13 +65,17 @@ void ASeniorProjectCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	//Add Input Mapping Context
-	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
+	if(APlayerController* PlayerController = Cast<APlayerController>(Controller))
 	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		if(UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<
+			UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
+
+	GetWorld()->GetTimerManager().SetTimer(SprintingHandle, this, &ASeniorProjectCharacter::HandleSprinting,
+	                                       StaminaDecrementTimerDuration, true);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -75,10 +84,11 @@ void ASeniorProjectCharacter::BeginPlay()
 void ASeniorProjectCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
 	// Set up action bindings
-	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) {
-		
+	if(UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
+	{
 		//Jumping
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this,
+		                                   &ASeniorProjectCharacter::AttemptJump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 
 		//Moving
@@ -86,9 +96,7 @@ void ASeniorProjectCharacter::SetupPlayerInputComponent(class UInputComponent* P
 
 		//Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ASeniorProjectCharacter::Look);
-
 	}
-
 }
 
 void ASeniorProjectCharacter::Move(const FInputActionValue& Value)
@@ -96,7 +104,7 @@ void ASeniorProjectCharacter::Move(const FInputActionValue& Value)
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
 
-	if (Controller != nullptr)
+	if(Controller != nullptr)
 	{
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -104,10 +112,20 @@ void ASeniorProjectCharacter::Move(const FInputActionValue& Value)
 
 		// get forward vector
 		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-	
+
 		// get right vector 
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
+		if(!bIsSprinting)
+		{
+			MovementVector.Y *= 0.5f;
+			MovementVector.X *= 0.5f;
+		}
+		else
+		{
+			MovementVector.Y *= 1.0f;
+			MovementVector.X *= 1.0f;
+		}
 		// add movement 
 		AddMovementInput(ForwardDirection, MovementVector.Y);
 		AddMovementInput(RightDirection, MovementVector.X);
@@ -119,7 +137,7 @@ void ASeniorProjectCharacter::Look(const FInputActionValue& Value)
 	// input is a Vector2D
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
 
-	if (Controller != nullptr)
+	if(Controller != nullptr)
 	{
 		// add yaw and pitch input to controller
 		AddControllerYawInput(LookAxisVector.X);
@@ -127,5 +145,45 @@ void ASeniorProjectCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
+void ASeniorProjectCharacter::StartSprinting()
+{
+	if(PlayerStatComp->GetStamina() > 0)
+	{
+		bIsSprinting = true;
+		PlayerStatComp->ControlSprintingTimer(true);
+	}
+	else if(PlayerStatComp->GetStamina() <= 0.0f)
+	{
+		PlayerStatComp->ControlSprintingTimer(false);
+	}
+}
 
+void ASeniorProjectCharacter::StopSprinting()
+{
+	bIsSprinting = false;
+	PlayerStatComp->ControlSprintingTimer(false);
+}
 
+void ASeniorProjectCharacter::HandleSprinting()
+{
+	if(bIsSprinting)
+	{
+		PlayerStatComp->LowerStamina(PlayerStatComp->GetStaminaDecrementValue());
+		if(PlayerStatComp->GetStamina() <= 0)
+		{
+			StopSprinting();
+		}
+	}
+}
+
+void ASeniorProjectCharacter::AttemptJump()
+{
+	if(PlayerStatComp)
+	{
+		if(PlayerStatComp->GetStamina() > JumpStaminaCost && !GetCharacterMovement()->IsFalling())
+		{
+			Jump();
+			PlayerStatComp->LowerStamina(JumpStaminaCost);
+		}
+	}
+}
