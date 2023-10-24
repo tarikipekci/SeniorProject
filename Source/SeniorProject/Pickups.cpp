@@ -1,0 +1,43 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "Pickups.h"
+
+#include "RPlayerStatComponent.h"
+#include "SeniorProjectCharacter.h"
+#include "Components/StaticMeshComponent.h"
+
+// Sets default values
+APickups::APickups()
+{
+	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>("StaticMeshComponent");
+	RootComponent = MeshComp;
+}
+
+// Called when the game starts or when spawned
+void APickups::BeginPlay()
+{
+	Super::BeginPlay();
+	SetReplicates(true);
+}
+
+void APickups::DestroyActor_Implementation()
+{
+	Destroy();
+}
+
+void APickups::UseItem(ASeniorProjectCharacter* Player)
+{
+	if(GetLocalRole() == ROLE_Authority)
+	{
+		if(PickupType == EPickupItemType::EEdible)
+		{
+			Player->PlayerStatComp->DecreaseHunger(DecreaseAmount);
+		}
+		else if(PickupType == EPickupItemType::EDrinkable)
+		{
+			Player->PlayerStatComp->DecreaseThirst(DecreaseAmount);
+		}
+		DestroyActor();
+	}
+}

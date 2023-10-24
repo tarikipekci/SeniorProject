@@ -10,8 +10,9 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "RLineTraceComponent.h"
 #include "TimerManager.h"
-
+#include "Pickups.h"
 
 //////////////////////////////////////////////////////////////////////////
 // ASeniorProjectCharacter
@@ -51,6 +52,7 @@ ASeniorProjectCharacter::ASeniorProjectCharacter()
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
 	PlayerStatComp = CreateDefaultSubobject<URPlayerStatComponent>("PlayerStatComponent");
+	LineTraceComp = CreateDefaultSubobject<URLineTraceComponent>("LineTraceComponent");
 	bIsSprinting = false;
 	StaminaDecrementTimerDuration = 0.1f;
 	JumpStaminaCost = 25.0f;
@@ -77,6 +79,7 @@ void ASeniorProjectCharacter::BeginPlay()
 	GetWorld()->GetTimerManager().SetTimer(SprintingHandle, this, &ASeniorProjectCharacter::HandleSprinting,
 	                                       StaminaDecrementTimerDuration, true);
 }
+
 
 //////////////////////////////////////////////////////////////////////////
 // Input
@@ -115,6 +118,7 @@ void ASeniorProjectCharacter::Move(const FInputActionValue& Value)
 
 		// get right vector 
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
 
 		if(!bIsSprinting)
 		{
@@ -184,6 +188,46 @@ void ASeniorProjectCharacter::AttemptJump()
 		{
 			Jump();
 			PlayerStatComp->LowerStamina(JumpStaminaCost);
+		}
+	}
+}
+
+void ASeniorProjectCharacter::Interact()
+{
+	FVector Start = GetMesh()->GetBoneLocation(FName("head"));
+	FVector End = Start + FollowCamera->GetForwardVector() * 170.0f;
+	AActor* Actor = LineTraceComp->LineTraceSingle(Start, End, true);
+	if(Actor)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("HIT ACTOR: %s"), *Actor->GetName());
+		APickups* Pickup = Cast<APickups>(Actor);
+		if(Pickup)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Actor is a pickup"));
+			ServerInteract();
+		}
+	}
+}
+
+bool ASeniorProjectCharacter::ServerInteract_Validate()
+{
+	return true;
+}
+
+void ASeniorProjectCharacter::ServerInteract_Implementation()
+{
+	if(GetOwner()->GetLocalRole() == ROLE_Authority)
+	{
+		FVector Start = GetMesh()->GetBoneLocation(FName("head"));
+		FVector End = Start + FollowCamera->GetForwardVector() * 170.0f;
+		AActor* Actor = LineTraceComp->LineTraceSingle(Start, End, true);
+		if(Actor)
+		{
+			APickups* Pickup = Cast<APickups>(Actor);
+			if(Pickup)
+			{
+				Pickup->UseItem(this);
+			}
 		}
 	}
 }

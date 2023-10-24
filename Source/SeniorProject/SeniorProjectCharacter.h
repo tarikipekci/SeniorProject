@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+#include "RPlayerStatComponent.h"
 #include "SeniorProjectCharacter.generated.h"
 
 
@@ -41,9 +42,9 @@ public:
 	ASeniorProjectCharacter();
 
 protected:
-	UPROPERTY(BlueprintReadWrite)
-	class URPlayerStatComponent* PlayerStatComp;
-	
+
+	class URLineTraceComponent* LineTraceComp;
+
 	bool bIsSprinting;
 	FTimerHandle SprintingHandle;
 	float StaminaDecrementTimerDuration;
@@ -66,12 +67,24 @@ protected:
 
 	void AttemptJump();
 
+	UFUNCTION(BlueprintCallable)
+	void Interact();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerInteract();
+	bool ServerInteract_Validate();
+	void ServerInteract_Implementation();
+
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	// To add mapping context
 	virtual void BeginPlay();
+
+public:
+	UPROPERTY(BlueprintReadWrite)
+	class URPlayerStatComponent* PlayerStatComp;
 
 public:
 	/** Returns CameraBoom subobject **/

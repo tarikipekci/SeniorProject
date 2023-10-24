@@ -18,7 +18,7 @@ public:
 
 protected:
 	UPROPERTY()
-	float MinHunger;
+	float MaxHunger;
 
 	UPROPERTY(Replicated)
 	float Hunger;
@@ -27,7 +27,9 @@ protected:
 	float HungerDecrementValue;
 
 	UPROPERTY()
-	float MinThirst;
+	float MaxThirst;
+	float DefaultHunger;
+	float DefaultThirst;
 
 	UPROPERTY(Replicated)
 	float Thirst;
@@ -63,14 +65,14 @@ protected:
 	void HandleHungerAndThirst();
 
 	UFUNCTION(Server, Reliable, WithValidation)
-	void ServerLowerHunger(float Value);
-	bool ServerLowerHunger_Validate(float Value);
-	void ServerLowerHunger_Implementation(float Value);
+	void ServerIncreaseHunger(float Value);
+	bool ServerIncreaseHunger_Validate(float Value);
+	void ServerIncreaseHunger_Implementation(float Value);
 
 	UFUNCTION(Server, Reliable, WithValidation)
-	void ServerLowerThirst(float Value);
-	bool ServerLowerThirst_Validate(float Value);
-	void ServerLowerThirst_Implementation(float Value);
+	void ServerIncreaseThirst(float Value);
+	bool ServerIncreaseThirst_Validate(float Value);
+	void ServerIncreaseThirst_Implementation(float Value);
 
 	UFUNCTION(Server, Reliable, WithValidation)
 	void ServerLowerStamina(float Value);
@@ -85,27 +87,35 @@ protected:
 	void RegenerateStamina();
 
 public:
-	void LowerHunger(float Value);
-	void LowerThirst(float Value);
+	void IncreaseHunger(float Value);
+	void IncreaseThirst(float Value);
 	void LowerStamina(float Value);
+	void DecreaseHunger(float Value);
+	void DecreaseThirst(float Value);
 
 	UFUNCTION(BlueprintCallable)
 	float GetHunger() const { return Hunger; }
 
 	UFUNCTION(BlueprintCallable)
-	float GetMinHunger() const { return MinHunger; }
+	float GetMaxHunger() const { return MaxHunger; }
 
 	UFUNCTION(BlueprintCallable)
 	float GetThirst() const { return Thirst; }
 
 	UFUNCTION(BlueprintCallable)
-	float GetMinThirst() const { return MinThirst; }
+	float GetMaxThirst() const { return MaxThirst; }
 
 	UFUNCTION(BlueprintCallable)
 	float GetMaxStamina() const { return MaxStamina; }
 
 	UFUNCTION(BlueprintCallable)
 	float GetStamina() const { return Stamina; }
+
+	UFUNCTION(BlueprintCallable)
+	float GetDefaultHunger() const { return DefaultHunger; }
+
+	UFUNCTION(BlueprintCallable)
+	float GetDefaultThirst() const { return DefaultThirst; }
 
 	UFUNCTION(BlueprintCallable)
 	float GetStaminaDecrementValue() const { return StaminaDecrementValue; }

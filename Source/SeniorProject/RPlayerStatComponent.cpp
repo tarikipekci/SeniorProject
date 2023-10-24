@@ -8,19 +8,21 @@
 // Sets default values for this component's properties
 URPlayerStatComponent::URPlayerStatComponent()
 {
-	MinHunger = 100.0f;
-	MinThirst = 100.0f;
+	DefaultHunger = 0.0f;
+	DefaultThirst = 0.0f;
+	MaxHunger = 100.0f;
+	MaxThirst = 100.0f;
 	MaxStamina = 100.0f;
 
-	Hunger = MinHunger;
-	Thirst = MinThirst;
+	Hunger = DefaultHunger;
+	Thirst = DefaultThirst;
 
 	HungerAndThirstTimerDuration = 3.0f;
 	StaminaRegenerationTimerDuration = 0.5f;
 	HungerDecrementValue = 0.3;
 	ThirstDecrementValue = 0.5f;
-	StaminaDecrementValue = 3.5f;
-	StaminaIncrementValue = 3.5f;
+	StaminaDecrementValue = 2.5f;
+	StaminaIncrementValue = 3.0f;
 	Stamina = MaxStamina;
 }
 
@@ -52,32 +54,32 @@ void URPlayerStatComponent::HandleHungerAndThirst()
 {
 	if(GetOwnerRole() == ROLE_Authority)
 	{
-		LowerHunger(HungerDecrementValue);
-		LowerThirst(ThirstDecrementValue);
+		IncreaseHunger(HungerDecrementValue);
+		IncreaseThirst(ThirstDecrementValue);
 	}
 }
 
-void URPlayerStatComponent::LowerHunger(float Value)
+void URPlayerStatComponent::IncreaseHunger(float Value)
 {
 	if(GetOwnerRole() < ROLE_Authority)
 	{
-		ServerLowerHunger(Value);
+		ServerIncreaseHunger(Value);
 	}
 	else if(GetOwnerRole() == ROLE_Authority)
 	{
-		Hunger -= Value;
+		Hunger += Value;
 	}
 }
 
-void URPlayerStatComponent::LowerThirst(float Value)
+void URPlayerStatComponent::IncreaseThirst(float Value)
 {
 	if(GetOwnerRole() < ROLE_Authority)
 	{
-		ServerLowerThirst(Value);
+		ServerIncreaseThirst(Value);
 	}
 	else if(GetOwnerRole() == ROLE_Authority)
 	{
-		Thirst -= Value;
+		Thirst += Value;
 	}
 }
 
@@ -100,29 +102,59 @@ void URPlayerStatComponent::LowerStamina(float Value)
 	}
 }
 
-bool URPlayerStatComponent::ServerLowerHunger_Validate(float Value)
-{
-	return true;
-}
-
-void URPlayerStatComponent::ServerLowerHunger_Implementation(float Value)
+void URPlayerStatComponent::DecreaseHunger(float Value)
 {
 	if(GetOwnerRole() == ROLE_Authority)
 	{
-		LowerHunger(Value);
+		if(Hunger - Value < 0)
+		{
+			Hunger = DefaultHunger;
+		}
+		else
+		{
+			Hunger -= Value;
+		}
 	}
 }
 
-bool URPlayerStatComponent::ServerLowerThirst_Validate(float Value)
+void URPlayerStatComponent::DecreaseThirst(float Value)
+{
+	if(GetOwnerRole() == ROLE_Authority)
+	{
+		if(Thirst - Value < 0)
+		{
+			Thirst = DefaultThirst;
+		}
+		else
+		{
+			Thirst -= Value;
+		}
+	}
+}
+
+bool URPlayerStatComponent::ServerIncreaseHunger_Validate(float Value)
 {
 	return true;
 }
 
-void URPlayerStatComponent::ServerLowerThirst_Implementation(float Value)
+void URPlayerStatComponent::ServerIncreaseHunger_Implementation(float Value)
 {
 	if(GetOwnerRole() == ROLE_Authority)
 	{
-		LowerThirst(Value);
+		IncreaseHunger(Value);
+	}
+}
+
+bool URPlayerStatComponent::ServerIncreaseThirst_Validate(float Value)
+{
+	return true;
+}
+
+void URPlayerStatComponent::ServerIncreaseThirst_Implementation(float Value)
+{
+	if(GetOwnerRole() == ROLE_Authority)
+	{
+		IncreaseThirst(Value);
 	}
 }
 
