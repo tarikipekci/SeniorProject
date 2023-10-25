@@ -170,7 +170,7 @@ void ASeniorProjectCharacter::StopSprinting()
 
 void ASeniorProjectCharacter::HandleSprinting()
 {
-	if(bIsSprinting)
+	if(bIsSprinting && this->GetVelocity().Size())
 	{
 		PlayerStatComp->LowerStamina(PlayerStatComp->GetStaminaDecrementValue());
 		if(PlayerStatComp->GetStamina() <= 0)

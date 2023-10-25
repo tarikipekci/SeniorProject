@@ -42,7 +42,6 @@ public:
 	ASeniorProjectCharacter();
 
 protected:
-
 	class URLineTraceComponent* LineTraceComp;
 
 	bool bIsSprinting;

@@ -34,6 +34,12 @@ protected:
 	UPROPERTY(Replicated)
 	float Thirst;
 
+	UPROPERTY(Replicated)
+	float Health;
+
+	UPROPERTY(EditAnywhere)
+	float MaxHealth;
+
 	UPROPERTY(EditAnywhere, Category = "S|PlayerStats")
 	float ThirstDecrementValue;
 
@@ -89,6 +95,7 @@ protected:
 public:
 	void IncreaseHunger(float Value);
 	void IncreaseThirst(float Value);
+	void IncreaseHealth(float Value);
 	void LowerStamina(float Value);
 	void DecreaseHunger(float Value);
 	void DecreaseThirst(float Value);
@@ -119,6 +126,12 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	float GetStaminaDecrementValue() const { return StaminaDecrementValue; }
+
+	UFUNCTION(BlueprintCallable)
+	float GetHealth() const { return Health; }
+
+	UFUNCTION(BlueprintCallable)
+	float GetMaxHealth() const { return MaxHealth; }
 
 	void ControlSprintingTimer(bool IsSprinting);
 };

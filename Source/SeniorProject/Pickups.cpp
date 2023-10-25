@@ -18,12 +18,10 @@ APickups::APickups()
 void APickups::BeginPlay()
 {
 	Super::BeginPlay();
-	SetReplicates(true);
-}
-
-void APickups::DestroyActor_Implementation()
-{
-	Destroy();
+	if(GetLocalRole() == ROLE_Authority)
+	{
+		SetReplicates(true);
+	}
 }
 
 void APickups::UseItem(ASeniorProjectCharacter* Player)
@@ -32,12 +30,16 @@ void APickups::UseItem(ASeniorProjectCharacter* Player)
 	{
 		if(PickupType == EPickupItemType::EEdible)
 		{
-			Player->PlayerStatComp->DecreaseHunger(DecreaseAmount);
+			Player->PlayerStatComp->DecreaseHunger(ChangeAmount);
 		}
 		else if(PickupType == EPickupItemType::EDrinkable)
 		{
-			Player->PlayerStatComp->DecreaseThirst(DecreaseAmount);
+			Player->PlayerStatComp->DecreaseThirst(ChangeAmount);
 		}
-		DestroyActor();
+		else if(PickupType == EPickupItemType::EHealth)
+		{
+			Player->PlayerStatComp->IncreaseHealth(ChangeAmount);
+		}
+		Destroy();
 	}
 }

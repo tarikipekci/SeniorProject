@@ -30,7 +30,7 @@ protected:
 	class UStaticMeshComponent* MeshComp;
 
 	UPROPERTY(EditAnywhere)
-	float DecreaseAmount;
+	float ChangeAmount;
 
 	UPROPERTY(EditAnywhere, Category = "Enums")
 	EPickupItemType PickupType;
@@ -38,9 +38,6 @@ protected:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
-	UFUNCTION(NetMulticast, Reliable)
-	void DestroyActor();
 
 public:
 	void UseItem(class ASeniorProjectCharacter* Player);

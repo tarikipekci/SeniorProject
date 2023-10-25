@@ -13,7 +13,9 @@ URPlayerStatComponent::URPlayerStatComponent()
 	MaxHunger = 100.0f;
 	MaxThirst = 100.0f;
 	MaxStamina = 100.0f;
+	MaxHealth = 100.0f;
 
+	Health = MaxHealth;
 	Hunger = DefaultHunger;
 	Thirst = DefaultThirst;
 
@@ -33,11 +35,14 @@ void URPlayerStatComponent::BeginPlay()
 	Super::BeginPlay();
 	SetIsReplicated(true);
 
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &URPlayerStatComponent::HandleHungerAndThirst,
-	                                       HungerAndThirstTimerDuration, true);
+	if(GetOwnerRole() == ROLE_Authority)
+	{
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &URPlayerStatComponent::HandleHungerAndThirst,
+		                                       HungerAndThirstTimerDuration, true);
 
-	GetWorld()->GetTimerManager().SetTimer(StaminaHandle, this, &URPlayerStatComponent::RegenerateStamina,
-	                                       StaminaRegenerationTimerDuration, true); // Regenerates stamina
+		GetWorld()->GetTimerManager().SetTimer(StaminaHandle, this, &URPlayerStatComponent::RegenerateStamina,
+		                                       StaminaRegenerationTimerDuration, true); // Regenerates stamina
+	}
 }
 
 void URPlayerStatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -48,6 +53,7 @@ void URPlayerStatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 	DOREPLIFETIME(URPlayerStatComponent, Hunger);
 	DOREPLIFETIME(URPlayerStatComponent, Thirst);
 	DOREPLIFETIME(URPlayerStatComponent, Stamina);
+	DOREPLIFETIME(URPlayerStatComponent, Health);
 }
 
 void URPlayerStatComponent::HandleHungerAndThirst()
@@ -182,6 +188,21 @@ void URPlayerStatComponent::RegenerateStamina()
 		else
 		{
 			Stamina += 5.0f;
+		}
+	}
+}
+
+void URPlayerStatComponent::IncreaseHealth(float Value)
+{
+	if(GetOwnerRole() == ROLE_Authority)
+	{
+		if(Health + Value > MaxHealth)
+		{
+			Health = MaxHealth;
+		}
+		else
+		{
+			Health += Value;
 		}
 	}
 }
