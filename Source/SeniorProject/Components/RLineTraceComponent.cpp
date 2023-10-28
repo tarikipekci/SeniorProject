@@ -2,7 +2,6 @@
 
 
 #include "RLineTraceComponent.h"
-#include "Kismet/KismetSystemLibrary.h"
 
 // Sets default values for this component's properties
 URLineTraceComponent::URLineTraceComponent()
@@ -16,26 +15,23 @@ void URLineTraceComponent::BeginPlay()
 	Super::BeginPlay();
 }
 
-AActor* URLineTraceComponent::LineTraceSingle(FVector Start, FVector End)
+AActor* URLineTraceComponent::LineTraceSingle(FVector Start, FVector End, ECollisionChannel Channel, bool ShowDebugLine)
 {
+	Channel = INTERACTABLE_CHANNEL;
 	FHitResult HitResult;
-	FCollisionObjectQueryParams CollisionParams;
 	FCollisionQueryParams CollisionQueryParams;
 	CollisionQueryParams.AddIgnoredActor(GetOwner());
-	if(GetWorld()->LineTraceSingleByObjectType(OUT HitResult, Start, End, CollisionParams, CollisionQueryParams))
+
+	if(GetWorld()->LineTraceSingleByChannel(OUT HitResult, Start, End, Channel, CollisionQueryParams))
 	{
 		return HitResult.GetActor();
 	}
 
-	return nullptr;
-}
-
-AActor* URLineTraceComponent::LineTraceSingle(FVector Start, FVector End, bool ShowDebugLine)
-{
-	AActor* Actor = LineTraceSingle(Start, End);
+#ifdef DEBUG_ENABLED
 	if(ShowDebugLine)
 	{
 		DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 3.0f, 0.0f, 5.0f);
 	}
-	return Actor;
+	return HitResult.GetActor();
+#endif
 }

@@ -1,7 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "SeniorProjectCharacter.h"
-#include "RPlayerStatComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
@@ -10,9 +9,11 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
-#include "RLineTraceComponent.h"
 #include "TimerManager.h"
-#include "Pickups.h"
+#include "SeniorProject/Components/RInteractComponent.h"
+#include "SeniorProject/Components/RLineTraceComponent.h"
+#include "SeniorProject/Components/RPlayerStatComponent.h"
+#include "SeniorProject/Environment/Pickups.h"
 
 //////////////////////////////////////////////////////////////////////////
 // ASeniorProjectCharacter
@@ -53,9 +54,13 @@ ASeniorProjectCharacter::ASeniorProjectCharacter()
 
 	PlayerStatComp = CreateDefaultSubobject<URPlayerStatComponent>("PlayerStatComponent");
 	LineTraceComp = CreateDefaultSubobject<URLineTraceComponent>("LineTraceComponent");
+	InteractComp = CreateDefaultSubobject<URInteractComponent>("InteractComponent");
+
+	InteractComp->SetupAttachment(RootComponent);
 	bIsSprinting = false;
 	StaminaDecrementTimerDuration = 0.1f;
 	JumpStaminaCost = 25.0f;
+	InteractRange = 170.0f;
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
@@ -172,7 +177,7 @@ void ASeniorProjectCharacter::HandleSprinting()
 {
 	if(bIsSprinting && this->GetVelocity().Size())
 	{
-		PlayerStatComp->LowerStamina(PlayerStatComp->GetStaminaDecrementValue());
+		PlayerStatComp->DecreaseStamina(PlayerStatComp->GetStaminaDecrementValue());
 		if(PlayerStatComp->GetStamina() <= 0)
 		{
 			StopSprinting();
@@ -187,23 +192,21 @@ void ASeniorProjectCharacter::AttemptJump()
 		if(PlayerStatComp->GetStamina() > JumpStaminaCost && !GetCharacterMovement()->IsFalling())
 		{
 			Jump();
-			PlayerStatComp->LowerStamina(JumpStaminaCost);
+			PlayerStatComp->DecreaseStamina(JumpStaminaCost);
 		}
 	}
 }
 
 void ASeniorProjectCharacter::Interact()
 {
-	FVector Start = GetMesh()->GetBoneLocation(FName("head"));
-	FVector End = Start + FollowCamera->GetForwardVector() * 170.0f;
-	AActor* Actor = LineTraceComp->LineTraceSingle(Start, End, true);
+	FVector Start = InteractComp->GetComponentLocation();
+	FVector End = Start + FollowCamera->GetForwardVector() * InteractRange;
+	AActor* Actor = LineTraceComp->LineTraceSingle(Start, End, INTERACTABLE_CHANNEL, true);
 	if(Actor)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("HIT ACTOR: %s"), *Actor->GetName());
 		APickups* Pickup = Cast<APickups>(Actor);
 		if(Pickup)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Actor is a pickup"));
 			ServerInteract();
 		}
 	}
@@ -218,9 +221,9 @@ void ASeniorProjectCharacter::ServerInteract_Implementation()
 {
 	if(GetOwner()->GetLocalRole() == ROLE_Authority)
 	{
-		FVector Start = GetMesh()->GetBoneLocation(FName("head"));
-		FVector End = Start + FollowCamera->GetForwardVector() * 170.0f;
-		AActor* Actor = LineTraceComp->LineTraceSingle(Start, End, true);
+		FVector Start = InteractComp->GetComponentLocation();
+		FVector End = Start + FollowCamera->GetForwardVector() * InteractRange;
+		AActor* Actor = LineTraceComp->LineTraceSingle(Start, End, INTERACTABLE_CHANNEL, true);
 		if(Actor)
 		{
 			APickups* Pickup = Cast<APickups>(Actor);

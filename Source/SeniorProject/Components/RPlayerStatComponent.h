@@ -17,8 +17,10 @@ public:
 	URPlayerStatComponent();
 
 protected:
+	//Hunger Properties
 	UPROPERTY()
 	float MaxHunger;
+	float DefaultHunger;
 
 	UPROPERTY(Replicated)
 	float Hunger;
@@ -26,26 +28,26 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "S|PlayerStats")
 	float HungerDecrementValue;
 
+
+	//Thirst Properties
 	UPROPERTY()
 	float MaxThirst;
-	float DefaultHunger;
 	float DefaultThirst;
 
 	UPROPERTY(Replicated)
 	float Thirst;
 
+	UPROPERTY(EditAnywhere, Category = "S|PlayerStats")
+	float ThirstDecrementValue;
+
+	//Health Properties
 	UPROPERTY(Replicated)
 	float Health;
 
 	UPROPERTY(EditAnywhere)
 	float MaxHealth;
 
-	UPROPERTY(EditAnywhere, Category = "S|PlayerStats")
-	float ThirstDecrementValue;
-
-	UPROPERTY(Replicated)
-	float HungerAndThirstTimerDuration;
-
+	//Stamina Properties
 	UPROPERTY(Replicated)
 	float Stamina;
 
@@ -55,8 +57,8 @@ protected:
 	UPROPERTY()
 	float StaminaRegenerationTimerDuration;
 
-	FTimerHandle TimerHandle;
-	FTimerHandle StaminaHandle;
+	UPROPERTY(Replicated)
+	float HungerAndThirstTimerDuration;
 
 	UPROPERTY(EditAnywhere, Category = "S|PlayerStats")
 	float StaminaDecrementValue;
@@ -64,27 +66,37 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "S|PlayerStats")
 	float StaminaIncrementValue;
 
+
+	//Timers
+	FTimerHandle TimerHandle; //For Hunger/Thirst
+	FTimerHandle StaminaHandle; //For Stamina
+
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
 	void HandleHungerAndThirst();
 
+	//Server function of IncreaseHunger
 	UFUNCTION(Server, Reliable, WithValidation)
 	void ServerIncreaseHunger(float Value);
 	bool ServerIncreaseHunger_Validate(float Value);
 	void ServerIncreaseHunger_Implementation(float Value);
 
+	//Server function of IncreaseThirst
 	UFUNCTION(Server, Reliable, WithValidation)
 	void ServerIncreaseThirst(float Value);
 	bool ServerIncreaseThirst_Validate(float Value);
 	void ServerIncreaseThirst_Implementation(float Value);
 
+	//Server function of DecreaseStamina
 	UFUNCTION(Server, Reliable, WithValidation)
-	void ServerLowerStamina(float Value);
-	bool ServerLowerStamina_Validate(float Value);
-	void ServerLowerStamina_Implementation(float Value);
+	void ServerDecreaseStamina(float Value);
+	bool ServerDecreaseStamina_Validate(float Value);
+	void ServerDecreaseStamina_Implementation(float Value);
 
+	//Server function of ControlSprintingTimer
 	UFUNCTION(Server, Reliable, WithValidation)
 	void ServerControlSprintingTimer(bool IsSprinting);
 	bool ServerControlSprintingTimer_Validate(bool IsSprinting);
@@ -93,13 +105,19 @@ protected:
 	void RegenerateStamina();
 
 public:
+	void ControlSprintingTimer(bool IsSprinting);
+
+	//Increase Stats
 	void IncreaseHunger(float Value);
 	void IncreaseThirst(float Value);
 	void IncreaseHealth(float Value);
-	void LowerStamina(float Value);
+
+	//Decrease Stats
+	void DecreaseStamina(float Value);
 	void DecreaseHunger(float Value);
 	void DecreaseThirst(float Value);
 
+	//Get Hunger Stats
 	UFUNCTION(BlueprintCallable)
 	float GetHunger() const { return Hunger; }
 
@@ -107,11 +125,19 @@ public:
 	float GetMaxHunger() const { return MaxHunger; }
 
 	UFUNCTION(BlueprintCallable)
+	float GetDefaultHunger() const { return DefaultHunger; }
+
+	//Get Thirst Stats
+	UFUNCTION(BlueprintCallable)
 	float GetThirst() const { return Thirst; }
 
 	UFUNCTION(BlueprintCallable)
 	float GetMaxThirst() const { return MaxThirst; }
 
+	UFUNCTION(BlueprintCallable)
+	float GetDefaultThirst() const { return DefaultThirst; }
+
+	//Get Stamina Stats
 	UFUNCTION(BlueprintCallable)
 	float GetMaxStamina() const { return MaxStamina; }
 
@@ -119,19 +145,12 @@ public:
 	float GetStamina() const { return Stamina; }
 
 	UFUNCTION(BlueprintCallable)
-	float GetDefaultHunger() const { return DefaultHunger; }
-
-	UFUNCTION(BlueprintCallable)
-	float GetDefaultThirst() const { return DefaultThirst; }
-
-	UFUNCTION(BlueprintCallable)
 	float GetStaminaDecrementValue() const { return StaminaDecrementValue; }
 
+	//Get Health Stats
 	UFUNCTION(BlueprintCallable)
 	float GetHealth() const { return Health; }
 
 	UFUNCTION(BlueprintCallable)
 	float GetMaxHealth() const { return MaxHealth; }
-
-	void ControlSprintingTimer(bool IsSprinting);
 };

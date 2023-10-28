@@ -8,24 +8,30 @@
 // Sets default values for this component's properties
 URPlayerStatComponent::URPlayerStatComponent()
 {
-	DefaultHunger = 0.0f;
-	DefaultThirst = 0.0f;
-	MaxHunger = 100.0f;
-	MaxThirst = 100.0f;
-	MaxStamina = 100.0f;
-	MaxHealth = 100.0f;
-
-	Health = MaxHealth;
-	Hunger = DefaultHunger;
-	Thirst = DefaultThirst;
-
 	HungerAndThirstTimerDuration = 3.0f;
-	StaminaRegenerationTimerDuration = 0.5f;
+
+	//Hunger
+	DefaultHunger = 0.0f;
+	MaxHunger = 100.0f;
+	Hunger = DefaultHunger;
 	HungerDecrementValue = 0.3;
+
+	//Thirst
+	DefaultThirst = 0.0f;
+	MaxThirst = 100.0f;
+	Thirst = DefaultThirst;
 	ThirstDecrementValue = 0.5f;
+
+	//Stamina
+	MaxStamina = 100.0f;
+	Stamina = MaxStamina;
+	StaminaRegenerationTimerDuration = 0.5f;
 	StaminaDecrementValue = 2.5f;
 	StaminaIncrementValue = 3.0f;
-	Stamina = MaxStamina;
+
+	//Health
+	MaxHealth = 100.0f;
+	Health = MaxHealth;
 }
 
 
@@ -33,10 +39,10 @@ URPlayerStatComponent::URPlayerStatComponent()
 void URPlayerStatComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	SetIsReplicated(true);
 
 	if(GetOwnerRole() == ROLE_Authority)
 	{
+		SetIsReplicated(true);
 		GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &URPlayerStatComponent::HandleHungerAndThirst,
 		                                       HungerAndThirstTimerDuration, true);
 
@@ -49,7 +55,7 @@ void URPlayerStatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	//Replicate to everyone
+	//Replicates to everyone
 	DOREPLIFETIME(URPlayerStatComponent, Hunger);
 	DOREPLIFETIME(URPlayerStatComponent, Thirst);
 	DOREPLIFETIME(URPlayerStatComponent, Stamina);
@@ -89,11 +95,11 @@ void URPlayerStatComponent::IncreaseThirst(float Value)
 	}
 }
 
-void URPlayerStatComponent::LowerStamina(float Value)
+void URPlayerStatComponent::DecreaseStamina(float Value)
 {
 	if(GetOwnerRole() < ROLE_Authority)
 	{
-		ServerLowerStamina(Value);
+		ServerDecreaseStamina(Value);
 	}
 	else if(GetOwnerRole() == ROLE_Authority)
 	{
@@ -164,16 +170,16 @@ void URPlayerStatComponent::ServerIncreaseThirst_Implementation(float Value)
 	}
 }
 
-bool URPlayerStatComponent::ServerLowerStamina_Validate(float Value)
+bool URPlayerStatComponent::ServerDecreaseStamina_Validate(float Value)
 {
 	return true;
 }
 
-void URPlayerStatComponent::ServerLowerStamina_Implementation(float Value)
+void URPlayerStatComponent::ServerDecreaseStamina_Implementation(float Value)
 {
 	if(GetOwnerRole() == ROLE_Authority)
 	{
-		LowerStamina(Value);
+		DecreaseStamina(Value);
 	}
 }
 

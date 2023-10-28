@@ -3,9 +3,9 @@
 
 #include "Pickups.h"
 
-#include "RPlayerStatComponent.h"
-#include "SeniorProjectCharacter.h"
 #include "Components/StaticMeshComponent.h"
+#include "SeniorProject/Characters/SeniorProjectCharacter.h"
+#include "SeniorProject/Components/RPlayerStatComponent.h"
 
 // Sets default values
 APickups::APickups()
