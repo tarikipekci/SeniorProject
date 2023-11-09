@@ -4,6 +4,7 @@
 #include "RInventoryComponent.h"
 
 #include "Net/UnrealNetwork.h"
+#include "SeniorProject/Environment/Pickups.h"
 // Sets default values for this component's properties
 URInventoryComponent::URInventoryComponent()
 {
@@ -24,4 +25,24 @@ void URInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 
 	//Replicates to everyone
 	DOREPLIFETIME(URInventoryComponent, Items);
+}
+
+
+bool URInventoryComponent::AddItem(APickups* Item)
+{
+	Items.Add(Item);
+	Item->InInventory(true);
+	
+	for(APickups* Pickup : Items)
+	{
+		FString Tempstr = "";
+		FString str = Tempstr.Append(Pickup->GetName());
+		GEngine->AddOnScreenDebugMessage(-1, 3, FColor::Cyan, str);
+	}
+	return false;
+}
+
+void URInventoryComponent::RemoveItem(APickups* Item)
+{
+	Item->InInventory(false);
 }

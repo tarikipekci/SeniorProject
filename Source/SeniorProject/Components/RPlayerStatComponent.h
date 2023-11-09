@@ -102,7 +102,11 @@ protected:
 	bool ServerControlSprintingTimer_Validate(bool IsSprinting);
 	void ServerControlSprintingTimer_Implementation(bool IsSprinting);
 
-	void RegenerateStamina();
+	//Server function of DecreaseHealth
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerDecreaseHealth(float Value);
+	bool ServerDecreaseHealth_Validate(float Value);
+	void ServerDecreaseHealth_Implementation(float Value);
 
 public:
 	void ControlSprintingTimer(bool IsSprinting);
@@ -111,11 +115,13 @@ public:
 	void IncreaseHunger(float Value);
 	void IncreaseThirst(float Value);
 	void IncreaseHealth(float Value);
-
+	void RegenerateStamina();
+	
 	//Decrease Stats
 	void DecreaseStamina(float Value);
 	void DecreaseHunger(float Value);
 	void DecreaseThirst(float Value);
+	void DecreaseHealth(float Value);
 
 	//Get Hunger Stats
 	UFUNCTION(BlueprintCallable)

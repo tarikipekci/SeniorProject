@@ -4,6 +4,7 @@
 #include "Pickups.h"
 
 #include "Components/StaticMeshComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "SeniorProject/Characters/SeniorProjectCharacter.h"
 #include "SeniorProject/Components/RPlayerStatComponent.h"
 
@@ -12,16 +13,28 @@ APickups::APickups()
 {
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>("StaticMeshComponent");
 	RootComponent = MeshComp;
+	bReplicates = true;
+	bObjectPickedUp = false;
+}
+
+void APickups::OnRep_PickedUp()
+{
+	this->MeshComp->SetHiddenInGame(bObjectPickedUp);
+	this->SetActorEnableCollision(!bObjectPickedUp);
 }
 
 // Called when the game starts or when spawned
 void APickups::BeginPlay()
 {
 	Super::BeginPlay();
-	if(GetLocalRole() == ROLE_Authority)
-	{
-		SetReplicates(true);
-	}
+}
+
+void APickups::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	//Replicates to everyone
+	DOREPLIFETIME(APickups, bObjectPickedUp);
 }
 
 void APickups::UseItem(ASeniorProjectCharacter* Player)
@@ -41,5 +54,14 @@ void APickups::UseItem(ASeniorProjectCharacter* Player)
 			Player->PlayerStatComp->IncreaseHealth(ChangeAmount);
 		}
 		Destroy();
+	}
+}
+
+void APickups::InInventory(bool In)
+{
+	if(GetLocalRole() == ROLE_Authority)
+	{
+		bObjectPickedUp = In;
+		OnRep_PickedUp();
 	}
 }

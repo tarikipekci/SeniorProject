@@ -10,7 +10,9 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "TimerManager.h"
+#include "Engine/DamageEvents.h"
 #include "SeniorProject/Components/RInteractComponent.h"
+#include "SeniorProject/Components/RInventoryComponent.h"
 #include "SeniorProject/Components/RLineTraceComponent.h"
 #include "SeniorProject/Components/RPlayerStatComponent.h"
 #include "SeniorProject/Environment/Pickups.h"
@@ -52,15 +54,18 @@ ASeniorProjectCharacter::ASeniorProjectCharacter()
 	// Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
+	// Create the player components
 	PlayerStatComp = CreateDefaultSubobject<URPlayerStatComponent>("PlayerStatComponent");
 	LineTraceComp = CreateDefaultSubobject<URLineTraceComponent>("LineTraceComponent");
 	InteractComp = CreateDefaultSubobject<URInteractComponent>("InteractComponent");
+	InventoryComp = CreateDefaultSubobject<URInventoryComponent>("InventoryComponent");
 
 	InteractComp->SetupAttachment(RootComponent);
 	bIsSprinting = false;
 	StaminaDecrementTimerDuration = 0.1f;
 	JumpStaminaCost = 25.0f;
 	InteractRange = 170.0f;
+	RespawnDuration = 3.0f;
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
@@ -83,6 +88,33 @@ void ASeniorProjectCharacter::BeginPlay()
 
 	GetWorld()->GetTimerManager().SetTimer(SprintingHandle, this, &ASeniorProjectCharacter::HandleSprinting,
 	                                       StaminaDecrementTimerDuration, true);
+}
+
+void ASeniorProjectCharacter::CallDestroy()
+{
+	this->Destroy();
+}
+
+float ASeniorProjectCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
+                                          AController* EventInstigator, AActor* DamageCauser)
+{
+	if(GetLocalRole() < ROLE_Authority || PlayerStatComp->GetHealth() <= 0.0f)
+	{
+		return 0.0f;
+	}
+
+	const float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	if(ActualDamage > 0.0f)
+	{
+		PlayerStatComp->DecreaseHealth(ActualDamage);
+		if(PlayerStatComp->GetHealth() <= 0.0f)
+		{
+			Die();
+		}
+	}
+
+	return ActualDamage;
 }
 
 
@@ -207,30 +239,98 @@ void ASeniorProjectCharacter::Interact()
 		APickups* Pickup = Cast<APickups>(Actor);
 		if(Pickup)
 		{
-			ServerInteract();
+			ServerInteract(Pickup);
 		}
 	}
 }
 
-bool ASeniorProjectCharacter::ServerInteract_Validate()
+bool ASeniorProjectCharacter::ServerInteract_Validate(AActor* Actor)
 {
 	return true;
 }
 
-void ASeniorProjectCharacter::ServerInteract_Implementation()
+void ASeniorProjectCharacter::ServerInteract_Implementation(AActor* Actor)
 {
 	if(GetOwner()->GetLocalRole() == ROLE_Authority)
 	{
 		FVector Start = InteractComp->GetComponentLocation();
-		FVector End = Start + FollowCamera->GetForwardVector() * InteractRange;
-		AActor* Actor = LineTraceComp->LineTraceSingle(Start, End, INTERACTABLE_CHANNEL, true);
+		FVector End = Actor->GetActorLocation();
+		AActor* HitActor = LineTraceComp->LineTraceSingle(Start, End, INTERACTABLE_CHANNEL, true);
 		if(Actor)
 		{
-			APickups* Pickup = Cast<APickups>(Actor);
+			APickups* Pickup = Cast<APickups>(HitActor);
 			if(Pickup)
 			{
-				Pickup->UseItem(this);
+				if(Pickup == Actor)
+				{
+					InventoryComp->AddItem(Pickup);
+				}
 			}
 		}
 	}
+}
+
+void ASeniorProjectCharacter::Attack()
+{
+	FVector Start = InteractComp->GetComponentLocation();
+	FVector End = Start + FollowCamera->GetForwardVector() * InteractRange;
+	AActor* Actor = LineTraceComp->LineTraceSingle(Start, End, INTERACTABLE_CHANNEL, true);
+	if(Actor)
+	{
+		ASeniorProjectCharacter* Player = Cast<ASeniorProjectCharacter>(Actor);
+		if(Player)
+		{
+			ServerAttack(Player);
+		}
+	}
+}
+
+bool ASeniorProjectCharacter::ServerAttack_Validate(AActor* Actor)
+{
+	return true;
+}
+
+void ASeniorProjectCharacter::ServerAttack_Implementation(AActor* Actor)
+{
+	if(GetOwner()->GetLocalRole() == ROLE_Authority)
+	{
+		FVector Start = InteractComp->GetComponentLocation();
+		FVector End = Actor->GetActorLocation();
+		AActor* HitActor = LineTraceComp->LineTraceSingle(Start, End, INTERACTABLE_CHANNEL, true);
+		if(Actor)
+		{
+			ASeniorProjectCharacter* Player = Cast<ASeniorProjectCharacter>(HitActor);
+			if(Player)
+			{
+				if(Player == Actor)
+				{
+					float TestDamage = 20.f;
+					Player->TakeDamage(TestDamage, FDamageEvent(), GetController(), this);
+				}
+			}
+		}
+	}
+}
+
+void ASeniorProjectCharacter::Die()
+{
+	if(GetLocalRole() == ROLE_Authority)
+	{
+		MultiDie();
+		//Start destroy timer to remove player actor from world
+		GetWorld()->GetTimerManager().SetTimer(DestroyHandle, this, &ASeniorProjectCharacter::CallDestroy,
+		                                       RespawnDuration, false);
+	}
+}
+
+bool ASeniorProjectCharacter::MultiDie_Validate()
+{
+	return true;
+}
+
+void ASeniorProjectCharacter::MultiDie_Implementation()
+{
+	this->GetCharacterMovement()->DisableMovement();
+	this->GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	this->GetMesh()->SetAllBodiesSimulatePhysics(true);
 }

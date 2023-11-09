@@ -35,10 +35,17 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Enums")
 	EPickupItemType PickupType;
 
+	UPROPERTY(ReplicatedUsing = OnRep_PickedUp)
+	bool bObjectPickedUp;
+
+	UFUNCTION()
+	void OnRep_PickedUp();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:
 	void UseItem(class ASeniorProjectCharacter* Player);
+	void InInventory(bool In);
 };

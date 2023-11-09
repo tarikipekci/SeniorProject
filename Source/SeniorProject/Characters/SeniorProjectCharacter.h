@@ -8,6 +8,8 @@
 #include "SeniorProjectCharacter.generated.h"
 
 
+class APickups;
+
 UCLASS(config=Game)
 class ASeniorProjectCharacter : public ACharacter
 {
@@ -49,14 +51,21 @@ public:
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
 	class URInteractComponent* InteractComp;
 
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
+	class URInventoryComponent* InventoryComp;
+
 protected:
 	float InteractRange;
+	float RespawnDuration;
 
 	//Stamina Properties
 	bool bIsSprinting;
 	float StaminaDecrementTimerDuration;
 	float JumpStaminaCost;
+
+	//Timers
 	FTimerHandle SprintingHandle;
+	FTimerHandle DestroyHandle;
 
 protected:
 	/** Called for movement input */
@@ -75,13 +84,28 @@ protected:
 
 	void AttemptJump();
 
+	void Die();
+
+	UFUNCTION(NetMulticast, Reliable, WithValidation)
+	void MultiDie();
+	bool MultiDie_Validate();
+	void MultiDie_Implementation();
+
+	UFUNCTION(BlueprintCallable)
+	void Attack();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerAttack(AActor* Actor);
+	bool ServerAttack_Validate(AActor* Actor);
+	void ServerAttack_Implementation(AActor* Actor);
+
 	UFUNCTION(BlueprintCallable)
 	void Interact();
 
 	UFUNCTION(Server, Reliable, WithValidation)
-	void ServerInteract();
-	bool ServerInteract_Validate();
-	void ServerInteract_Implementation();
+	void ServerInteract(AActor* Actor);
+	bool ServerInteract_Validate(AActor* Actor);
+	void ServerInteract_Implementation(AActor* Actor);
 
 protected:
 	// APawn interface
@@ -89,6 +113,13 @@ protected:
 
 	// To add mapping context
 	virtual void BeginPlay();
+
+	// Calls Destroy()
+	void CallDestroy();
+
+public:
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator,
+	                         AActor* DamageCauser) override;
 
 public:
 	/** Returns CameraBoom subobject **/

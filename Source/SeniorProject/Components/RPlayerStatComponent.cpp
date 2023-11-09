@@ -244,3 +244,28 @@ void URPlayerStatComponent::ServerControlSprintingTimer_Implementation(bool IsSp
 		ControlSprintingTimer(IsSprinting);
 	}
 }
+
+void URPlayerStatComponent::DecreaseHealth(float Value)
+{
+	if(GetOwnerRole() < ROLE_Authority)
+	{
+		ServerDecreaseHealth(Value);
+	}
+	else if(GetOwnerRole() == ROLE_Authority)
+	{
+		Health -= Value;
+	}
+}
+
+bool URPlayerStatComponent::ServerDecreaseHealth_Validate(float Value)
+{
+	return true;
+}
+
+void URPlayerStatComponent::ServerDecreaseHealth_Implementation(float Value)
+{
+	if(GetOwnerRole() == ROLE_Authority)
+	{
+		DecreaseHealth(Value);
+	}
+}

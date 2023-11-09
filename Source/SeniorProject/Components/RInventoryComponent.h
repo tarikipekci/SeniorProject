@@ -23,4 +23,8 @@ protected:
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
+
+public:
+	bool AddItem(APickups* Item);
+	void RemoveItem(APickups* Item);
 };
