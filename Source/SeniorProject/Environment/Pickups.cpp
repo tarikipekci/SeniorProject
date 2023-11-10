@@ -14,6 +14,7 @@ APickups::APickups()
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>("StaticMeshComponent");
 	RootComponent = MeshComp;
 	bReplicates = true;
+	SetReplicatingMovement(true);
 	bObjectPickedUp = false;
 }
 

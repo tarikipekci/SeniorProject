@@ -26,5 +26,6 @@ protected:
 
 public:
 	bool AddItem(APickups* Item);
-	void RemoveItem(APickups* Item);
+	void DropItem(APickups* Item);
+	void DropAllInventoryItems();
 };

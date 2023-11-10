@@ -32,7 +32,7 @@ bool URInventoryComponent::AddItem(APickups* Item)
 {
 	Items.Add(Item);
 	Item->InInventory(true);
-	
+
 	for(APickups* Pickup : Items)
 	{
 		FString Tempstr = "";
@@ -42,7 +42,23 @@ bool URInventoryComponent::AddItem(APickups* Item)
 	return false;
 }
 
-void URInventoryComponent::RemoveItem(APickups* Item)
+void URInventoryComponent::DropItem(APickups* Item)
 {
-	Item->InInventory(false);
+	if(GetOwnerRole() == ROLE_Authority)
+	{
+		FVector Location = GetOwner()->GetActorLocation();
+		Item->SetActorLocation(Location);
+		Item->InInventory(false);
+	}
+}
+
+void URInventoryComponent::DropAllInventoryItems()
+{
+	if(GetOwnerRole() == ROLE_Authority)
+	{
+		for(APickups* Pickup : Items)
+		{
+			DropItem(Pickup);
+		}
+	}
 }

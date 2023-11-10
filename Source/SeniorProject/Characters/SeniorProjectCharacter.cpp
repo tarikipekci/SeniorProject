@@ -65,7 +65,7 @@ ASeniorProjectCharacter::ASeniorProjectCharacter()
 	StaminaDecrementTimerDuration = 0.1f;
 	JumpStaminaCost = 25.0f;
 	InteractRange = 170.0f;
-	RespawnDuration = 3.0f;
+	RespawnDuration = 5.0f;
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
@@ -316,6 +316,7 @@ void ASeniorProjectCharacter::Die()
 {
 	if(GetLocalRole() == ROLE_Authority)
 	{
+		InventoryComp->DropAllInventoryItems();
 		MultiDie();
 		//Start destroy timer to remove player actor from world
 		GetWorld()->GetTimerManager().SetTimer(DestroyHandle, this, &ASeniorProjectCharacter::CallDestroy,
