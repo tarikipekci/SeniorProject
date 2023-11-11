@@ -43,6 +43,7 @@ protected:
 	//Health Properties
 	UPROPERTY(Replicated)
 	float Health;
+	float DamageMultiplier; //In case of hunger/thirst == 0
 
 	UPROPERTY(EditAnywhere)
 	float MaxHealth;

@@ -4,6 +4,8 @@
 #include "RPlayerStatComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "TimerManager.h"
+#include "Engine/DamageEvents.h"
+#include "SeniorProject/Characters/SeniorProjectCharacter.h"
 
 // Sets default values for this component's properties
 URPlayerStatComponent::URPlayerStatComponent()
@@ -32,6 +34,7 @@ URPlayerStatComponent::URPlayerStatComponent()
 	//Health
 	MaxHealth = 100.0f;
 	Health = MaxHealth;
+	DamageMultiplier = 0.1f;
 }
 
 
@@ -56,10 +59,10 @@ void URPlayerStatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	//Replicates to everyone
-	DOREPLIFETIME(URPlayerStatComponent, Hunger);
-	DOREPLIFETIME(URPlayerStatComponent, Thirst);
-	DOREPLIFETIME(URPlayerStatComponent, Stamina);
-	DOREPLIFETIME(URPlayerStatComponent, Health);
+	DOREPLIFETIME_CONDITION(URPlayerStatComponent, Hunger, COND_OwnerOnly);
+	DOREPLIFETIME_CONDITION(URPlayerStatComponent, Thirst, COND_OwnerOnly);
+	DOREPLIFETIME_CONDITION(URPlayerStatComponent, Stamina, COND_OwnerOnly);
+	DOREPLIFETIME_CONDITION(URPlayerStatComponent, Health, COND_OwnerOnly);
 }
 
 void URPlayerStatComponent::HandleHungerAndThirst()
@@ -80,6 +83,14 @@ void URPlayerStatComponent::IncreaseHunger(float Value)
 	else if(GetOwnerRole() == ROLE_Authority)
 	{
 		Hunger += Value;
+
+		if(Hunger > MaxHunger)
+		{
+			if(ASeniorProjectCharacter* Character = Cast<ASeniorProjectCharacter>(GetOwner()))
+			{
+				Character->TakeDamage(Hunger * DamageMultiplier, FDamageEvent(), Character->GetController(), Character);
+			}
+		}
 	}
 }
 
@@ -92,6 +103,14 @@ void URPlayerStatComponent::IncreaseThirst(float Value)
 	else if(GetOwnerRole() == ROLE_Authority)
 	{
 		Thirst += Value;
+
+		if(Thirst > MaxThirst)
+		{
+			if(ASeniorProjectCharacter* Character = Cast<ASeniorProjectCharacter>(GetOwner()))
+			{
+				Character->TakeDamage(Thirst * DamageMultiplier, FDamageEvent(), Character->GetController(), Character);
+			}
+		}
 	}
 }
 
@@ -103,7 +122,7 @@ void URPlayerStatComponent::DecreaseStamina(float Value)
 	}
 	else if(GetOwnerRole() == ROLE_Authority)
 	{
-		if(Stamina - Value < 0.0f)
+		if(Stamina - Value <= 0.0f)
 		{
 			Stamina = 0.0f;
 		}
@@ -118,13 +137,17 @@ void URPlayerStatComponent::DecreaseHunger(float Value)
 {
 	if(GetOwnerRole() == ROLE_Authority)
 	{
-		if(Hunger - Value < 0)
+		if(Hunger - Value <= 0)
 		{
 			Hunger = DefaultHunger;
 		}
 		else
 		{
-			Hunger -= Value;
+			if(Hunger >= MaxHunger)
+			{
+				Hunger = MaxHunger;
+				Hunger -= Value;
+			}
 		}
 	}
 }
@@ -133,13 +156,17 @@ void URPlayerStatComponent::DecreaseThirst(float Value)
 {
 	if(GetOwnerRole() == ROLE_Authority)
 	{
-		if(Thirst - Value < 0)
+		if(Thirst - Value <= 0)
 		{
 			Thirst = DefaultThirst;
 		}
 		else
 		{
-			Thirst -= Value;
+			if(Thirst >= MaxThirst)
+			{
+				Thirst = MaxThirst;
+				Thirst -= Value;
+			}
 		}
 	}
 }
