@@ -24,7 +24,7 @@ void URInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	//Replicates to everyone
-	DOREPLIFETIME(URInventoryComponent, Items);
+	DOREPLIFETIME_CONDITION(URInventoryComponent, Items, COND_OwnerOnly);
 }
 
 
@@ -47,6 +47,22 @@ void URInventoryComponent::DropItem(APickups* Item)
 	if(GetOwnerRole() == ROLE_Authority)
 	{
 		FVector Location = GetOwner()->GetActorLocation();
+		Location.X += FMath::RandRange(-50.0f, 100.0f);
+		Location.Y += FMath::RandRange(-50.0f, 100.0f);
+		FVector EndRay = Location;
+		EndRay.Z -= 10000.0f;
+		FHitResult HitResult;
+		FCollisionObjectQueryParams ObjQuery;
+		FCollisionQueryParams CollisionsParams;
+		CollisionsParams.AddIgnoredActor(GetOwner());
+		
+		GetWorld()->LineTraceSingleByObjectType(OUT HitResult, Location, EndRay, ObjQuery, CollisionsParams);
+
+		if(HitResult.ImpactPoint != FVector::ZeroVector)
+		{
+			Location = HitResult.ImpactPoint;
+		}
+
 		Item->SetActorLocation(Location);
 		Item->InInventory(false);
 	}
@@ -60,5 +76,6 @@ void URInventoryComponent::DropAllInventoryItems()
 		{
 			DropItem(Pickup);
 		}
+		Items.Empty();
 	}
 }
