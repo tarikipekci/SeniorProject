@@ -3,8 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InteractableInterface.h"
 #include "GameFramework/Actor.h"
-#include "Pickups.generated.h"
+#include "SeniorProject/Structs/FItemData.h"
+#include "Item.generated.h"
 
 UENUM(BlueprintType)
 enum class EPickupItemType : uint8
@@ -17,18 +19,18 @@ enum class EPickupItemType : uint8
 class ASeniorProjectCharacter;
 
 UCLASS()
-class SENIORPROJECT_API APickups : public AActor
+class SENIORPROJECT_API AItem : public AActor, public IInteractableInterface
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this actor's properties
-	APickups();
+	AItem();
 
 protected:
 	UPROPERTY(EditAnywhere)
-	class UStaticMeshComponent* MeshComp;
-
+	UStaticMeshComponent* MeshComp;
+	
 	UPROPERTY(EditAnywhere)
 	float ChangeAmount;
 
@@ -38,6 +40,9 @@ protected:
 	UPROPERTY(ReplicatedUsing = OnRep_PickedUp)
 	bool bObjectPickedUp;
 
+	UPROPERTY(EditDefaultsOnly)
+	FItemData ItemData;
+	
 	UFUNCTION()
 	void OnRep_PickedUp();
 
@@ -46,6 +51,8 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	void UseItem(class ASeniorProjectCharacter* Player);
+	void UseItem(ASeniorProjectCharacter* Player);
 	void InInventory(bool In);
+	virtual void Interact(ASeniorProjectCharacter* Player) override;
+	FItemData GetItemData() const {return ItemData;}
 };

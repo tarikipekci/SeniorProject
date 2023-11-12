@@ -15,7 +15,6 @@ void PrintString(const FString& Str)
 
 UMultiplayerSessionsSubsystem::UMultiplayerSessionsSubsystem()
 {
-	PrintString("MSS Constructor");
 	CreateServerAfterDestroy = false;
 	DestroyServerName = "";
 	ServerNameToFind = "";
@@ -25,7 +24,6 @@ UMultiplayerSessionsSubsystem::UMultiplayerSessionsSubsystem()
 void UMultiplayerSessionsSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
-	PrintString("MSS Initialize");
 
 	IOnlineSubsystem* OnlineSubSystem = IOnlineSubsystem::Get();
 
@@ -38,7 +36,6 @@ void UMultiplayerSessionsSubsystem::Initialize(FSubsystemCollectionBase& Collect
 
 		if(SessionInterface.IsValid())
 		{
-			PrintString("Session interface is valid!");
 			SessionInterface->OnCreateSessionCompleteDelegates.AddUObject(
 				this, &UMultiplayerSessionsSubsystem::OnCreateSessionComplete);
 
@@ -57,16 +54,12 @@ void UMultiplayerSessionsSubsystem::Initialize(FSubsystemCollectionBase& Collect
 void UMultiplayerSessionsSubsystem::Deinitialize()
 {
 	Super::Deinitialize();
-	UE_LOG(LogTemp, Warning, TEXT("MSS Deinitialize"));
 }
 
 void UMultiplayerSessionsSubsystem::CreateServer(FString ServerName)
 {
-	PrintString("CreateServer");
-
 	if(ServerName.IsEmpty())
 	{
-		PrintString("Server name cannot be empty");
 		ServerCreateDel.Broadcast(false);
 		return;
 	}
@@ -75,9 +68,6 @@ void UMultiplayerSessionsSubsystem::CreateServer(FString ServerName)
 
 	if(ExistingSession)
 	{
-		FString Msg = FString::Printf(
-			TEXT("Session with name %s already exists, destroying it."), *MySessionName.ToString());
-		PrintString(Msg);
 		CreateServerAfterDestroy = true;
 		DestroyServerName = ServerName;
 		SessionInterface->DestroySession(MySessionName);
@@ -106,8 +96,6 @@ void UMultiplayerSessionsSubsystem::CreateServer(FString ServerName)
 
 void UMultiplayerSessionsSubsystem::FindServer(FString ServerName)
 {
-	PrintString("FindServer");
-
 	if(ServerName.IsEmpty())
 	{
 		PrintString("Server name cannot be empty!");

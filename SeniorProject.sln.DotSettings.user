@@ -2,5 +2,6 @@
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=f1252c08_002D09e7_002D467e_002D8dbc_002Dc5065e04cd8d/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="All tests from &amp;lt;Engine&amp;gt;" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;Project Location="E:\SeniorProjectGit" Presentation="&amp;lt;Engine&amp;gt;" /&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=ARHUD/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=subobject/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=Tempstr/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>

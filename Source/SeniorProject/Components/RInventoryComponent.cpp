@@ -4,18 +4,17 @@
 #include "RInventoryComponent.h"
 
 #include "Net/UnrealNetwork.h"
-#include "SeniorProject/Environment/Pickups.h"
+#include "..\Environment\Item.h"
 // Sets default values for this component's properties
 URInventoryComponent::URInventoryComponent()
 {
+	
 }
-
 
 // Called when the game starts
 void URInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
 	// ...
 }
 
@@ -28,12 +27,12 @@ void URInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 }
 
 
-bool URInventoryComponent::AddItem(APickups* Item)
+bool URInventoryComponent::AddItem(AItem* Item)
 {
 	Items.Add(Item);
 	Item->InInventory(true);
 
-	for(APickups* Pickup : Items)
+	for(AItem* Pickup : Items)
 	{
 		FString Tempstr = "";
 		FString str = Tempstr.Append(Pickup->GetName());
@@ -42,7 +41,7 @@ bool URInventoryComponent::AddItem(APickups* Item)
 	return false;
 }
 
-void URInventoryComponent::DropItem(APickups* Item)
+void URInventoryComponent::DropItem(AItem* Item)
 {
 	if(GetOwnerRole() == ROLE_Authority)
 	{
@@ -72,7 +71,7 @@ void URInventoryComponent::DropAllInventoryItems()
 {
 	if(GetOwnerRole() == ROLE_Authority)
 	{
-		for(APickups* Pickup : Items)
+		for(AItem* Pickup : Items)
 		{
 			DropItem(Pickup);
 		}

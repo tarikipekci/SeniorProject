@@ -5,10 +5,14 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+#include "SeniorProject/Structs/FItemData.h"
 #include "SeniorProjectCharacter.generated.h"
 
 
-class APickups;
+struct FItemData;
+class AItem;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FItemPickedUp, FItemData, ItemData);
 
 UCLASS(config=Game)
 class ASeniorProjectCharacter : public ACharacter
@@ -42,6 +46,8 @@ class ASeniorProjectCharacter : public ACharacter
 public:
 	ASeniorProjectCharacter();
 
+	//Player Components
+
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
 	class URPlayerStatComponent* PlayerStatComp;
 
@@ -53,6 +59,10 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
 	class URInventoryComponent* InventoryComp;
+
+	//Delegates
+	UPROPERTY(BlueprintAssignable)
+	FItemPickedUp ItemPickedUp;
 
 protected:
 	float InteractRange;
@@ -101,7 +111,7 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void Interact();
-
+	
 	UFUNCTION(Server, Reliable, WithValidation)
 	void ServerInteract(AActor* Actor);
 	bool ServerInteract_Validate(AActor* Actor);
@@ -116,6 +126,10 @@ protected:
 
 	// Calls Destroy()
 	void CallDestroy();
+
+	// Gets player's inventory component
+	UFUNCTION(BlueprintCallable)
+	URInventoryComponent* GetInventoryComp() const {return InventoryComp;}
 
 public:
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator,

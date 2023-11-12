@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Pickups.h"
+#include "Item.h"
 
 #include "Components/StaticMeshComponent.h"
 #include "Net/UnrealNetwork.h"
@@ -9,7 +9,7 @@
 #include "SeniorProject/Components/RPlayerStatComponent.h"
 
 // Sets default values
-APickups::APickups()
+AItem::AItem()
 {
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>("StaticMeshComponent");
 	RootComponent = MeshComp;
@@ -18,27 +18,27 @@ APickups::APickups()
 	bObjectPickedUp = false;
 }
 
-void APickups::OnRep_PickedUp()
+void AItem::OnRep_PickedUp()
 {
 	this->MeshComp->SetHiddenInGame(bObjectPickedUp);
 	this->SetActorEnableCollision(!bObjectPickedUp);
 }
 
 // Called when the game starts or when spawned
-void APickups::BeginPlay()
+void AItem::BeginPlay()
 {
 	Super::BeginPlay();
 }
 
-void APickups::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+void AItem::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	//Replicates to everyone
-	DOREPLIFETIME(APickups, bObjectPickedUp);
+	DOREPLIFETIME(AItem, bObjectPickedUp);
 }
 
-void APickups::UseItem(ASeniorProjectCharacter* Player)
+void AItem::UseItem(ASeniorProjectCharacter* Player)
 {
 	if(GetLocalRole() == ROLE_Authority)
 	{
@@ -58,11 +58,20 @@ void APickups::UseItem(ASeniorProjectCharacter* Player)
 	}
 }
 
-void APickups::InInventory(bool In)
+void AItem::InInventory(bool In)
 {
 	if(GetLocalRole() == ROLE_Authority)
 	{
 		bObjectPickedUp = In;
 		OnRep_PickedUp();
 	}
+}
+
+void AItem::Interact(ASeniorProjectCharacter* Player)
+{
+	if(Player)
+	{
+		Player->ItemPickedUp.Broadcast(ItemData);
+	}
+	Destroy();
 }

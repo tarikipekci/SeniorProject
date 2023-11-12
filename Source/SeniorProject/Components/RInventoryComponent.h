@@ -18,14 +18,20 @@ public:
 
 protected:
 	UPROPERTY(Replicated)
-	TArray<class APickups*> Items;
+	TArray<class AItem*> Items;
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
 public:
-	bool AddItem(APickups* Item);
-	void DropItem(APickups* Item);
+	bool AddItem(AItem* Item);
+	void DropItem(AItem* Item);
 	void DropAllInventoryItems();
+
+	UFUNCTION(BlueprintCallable)
+	TArray<class AItem*> GetInventoryItems() const {return Items;};
+
+	UFUNCTION(BlueprintCallable)
+	int32 GetCurrentInventoryCount() const {return Items.Num() - 1;}
 };

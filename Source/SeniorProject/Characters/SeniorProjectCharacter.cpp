@@ -15,7 +15,7 @@
 #include "SeniorProject/Components/RInventoryComponent.h"
 #include "SeniorProject/Components/RLineTraceComponent.h"
 #include "SeniorProject/Components/RPlayerStatComponent.h"
-#include "SeniorProject/Environment/Pickups.h"
+#include "..\Environment\Item.h"
 
 //////////////////////////////////////////////////////////////////////////
 // ASeniorProjectCharacter
@@ -236,10 +236,10 @@ void ASeniorProjectCharacter::Interact()
 	AActor* Actor = LineTraceComp->LineTraceSingle(Start, End, INTERACTABLE_CHANNEL, true);
 	if(Actor)
 	{
-		APickups* Pickup = Cast<APickups>(Actor);
-		if(Pickup)
+		AItem* Pickup = Cast<AItem>(Actor);
+		if(IInteractableInterface* Interface = Cast<IInteractableInterface>(Pickup))
 		{
-			ServerInteract(Pickup);
+			Interface->Interact(this);
 		}
 	}
 }
@@ -258,12 +258,12 @@ void ASeniorProjectCharacter::ServerInteract_Implementation(AActor* Actor)
 		AActor* HitActor = LineTraceComp->LineTraceSingle(Start, End, INTERACTABLE_CHANNEL, true);
 		if(Actor)
 		{
-			APickups* Pickup = Cast<APickups>(HitActor);
-			if(Pickup)
+			AItem* Item = Cast<AItem>(HitActor);
+			if(Item)
 			{
-				if(Pickup == Actor)
+				if(Item == Actor)
 				{
-					InventoryComp->AddItem(Pickup);
+					InventoryComp->AddItem(Item);
 				}
 			}
 		}
