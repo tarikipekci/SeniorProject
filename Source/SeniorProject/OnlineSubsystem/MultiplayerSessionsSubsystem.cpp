@@ -29,9 +29,6 @@ void UMultiplayerSessionsSubsystem::Initialize(FSubsystemCollectionBase& Collect
 
 	if(OnlineSubSystem)
 	{
-		FString SubSystemName = OnlineSubSystem->GetSubsystemName().ToString();
-		PrintString(SubSystemName);
-
 		SessionInterface = OnlineSubSystem->GetSessionInterface();
 
 		if(SessionInterface.IsValid())
@@ -130,7 +127,7 @@ void UMultiplayerSessionsSubsystem::OnCreateSessionComplete(FName SessionName, b
 		{
 			return;
 		}
-		GetWorld()->ServerTravel("/Game/ThirdPerson/Maps/ThirdPersonMap?listen");
+		GetWorld()->ServerTravel("/Game/GameMap?listen");
 	}
 }
 

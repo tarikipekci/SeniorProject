@@ -4,8 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "SeniorProject/Structs/FItemData.h"
 #include "RInventoryComponent.generated.h"
 
+
+class ASeniorProjectCharacter;
+
+namespace EQSDebug
+{
+	struct FItemData;
+}
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class SENIORPROJECT_API URInventoryComponent : public UActorComponent
@@ -17,21 +25,23 @@ public:
 	URInventoryComponent();
 
 protected:
-	UPROPERTY(Replicated)
-	TArray<class AItem*> Items;
+	UPROPERTY(ReplicatedUsing= OnRep_ItemPickedUp, BlueprintReadWrite, Category="Inventory")
+	TArray<FItemData> InventoryItems;
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
 public:
-	bool AddItem(AItem* Item);
-	void DropItem(AItem* Item);
-	void DropAllInventoryItems();
-
 	UFUNCTION(BlueprintCallable)
-	TArray<class AItem*> GetInventoryItems() const {return Items;};
+	void AddItem(FItemData ItemData);
 
+	UFUNCTION()
+	void OnRep_ItemPickedUp();
+	
 	UFUNCTION(BlueprintCallable)
-	int32 GetCurrentInventoryCount() const {return Items.Num() - 1;}
+	TArray<FItemData> GetInventoryItems() const {return InventoryItems;};
+
+private:
+	ASeniorProjectCharacter* Player;
 };

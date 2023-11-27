@@ -4,8 +4,8 @@
 #include "Item.h"
 
 #include "Components/StaticMeshComponent.h"
-#include "Net/UnrealNetwork.h"
 #include "SeniorProject/Characters/SeniorProjectCharacter.h"
+#include "SeniorProject/Components/RInventoryComponent.h"
 #include "SeniorProject/Components/RPlayerStatComponent.h"
 
 // Sets default values
@@ -15,13 +15,6 @@ AItem::AItem()
 	RootComponent = MeshComp;
 	bReplicates = true;
 	SetReplicatingMovement(true);
-	bObjectPickedUp = false;
-}
-
-void AItem::OnRep_PickedUp()
-{
-	this->MeshComp->SetHiddenInGame(bObjectPickedUp);
-	this->SetActorEnableCollision(!bObjectPickedUp);
 }
 
 // Called when the game starts or when spawned
@@ -30,16 +23,19 @@ void AItem::BeginPlay()
 	Super::BeginPlay();
 }
 
-void AItem::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+void AItem::Interact(ASeniorProjectCharacter* Player)
 {
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	//Replicates to everyone
-	DOREPLIFETIME(AItem, bObjectPickedUp);
+	if(HasAuthority() && Player)
+	{
+		Player->InventoryComp->AddItem(ItemData);
+		Destroy();
+	}
 }
 
-void AItem::UseItem(ASeniorProjectCharacter* Player)
+void AItem::Use(ASeniorProjectCharacter* Player)
 {
+	IInteractableInterface::Use(Player);
+
 	if(GetLocalRole() == ROLE_Authority)
 	{
 		if(PickupType == EPickupItemType::EEdible)
@@ -54,24 +50,5 @@ void AItem::UseItem(ASeniorProjectCharacter* Player)
 		{
 			Player->PlayerStatComp->IncreaseHealth(ChangeAmount);
 		}
-		Destroy();
 	}
-}
-
-void AItem::InInventory(bool In)
-{
-	if(GetLocalRole() == ROLE_Authority)
-	{
-		bObjectPickedUp = In;
-		OnRep_PickedUp();
-	}
-}
-
-void AItem::Interact(ASeniorProjectCharacter* Player)
-{
-	if(Player)
-	{
-		Player->ItemPickedUp.Broadcast(ItemData);
-	}
-	Destroy();
 }

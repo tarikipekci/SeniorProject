@@ -15,7 +15,7 @@
 #include "SeniorProject/Components/RInventoryComponent.h"
 #include "SeniorProject/Components/RLineTraceComponent.h"
 #include "SeniorProject/Components/RPlayerStatComponent.h"
-#include "..\Environment\Item.h"
+#include "SeniorProject/Environment/Item.h"
 
 //////////////////////////////////////////////////////////////////////////
 // ASeniorProjectCharacter
@@ -59,12 +59,16 @@ ASeniorProjectCharacter::ASeniorProjectCharacter()
 	LineTraceComp = CreateDefaultSubobject<URLineTraceComponent>("LineTraceComponent");
 	InteractComp = CreateDefaultSubobject<URInteractComponent>("InteractComponent");
 	InventoryComp = CreateDefaultSubobject<URInventoryComponent>("InventoryComponent");
+	PlayerNameTagComp = CreateDefaultSubobject<UWidgetComponent>("PlayerNameTagComponent");
+	check(PlayerNameTagComp);
+	PlayerNameTagComp->SetWidgetSpace(EWidgetSpace::Screen);
+	PlayerNameTagComp->SetWorldLocation(FVector(0, 0, 0));
+	PlayerNameTagComp->SetupAttachment(FollowCamera);
 
 	InteractComp->SetupAttachment(RootComponent);
 	bIsSprinting = false;
 	StaminaDecrementTimerDuration = 0.1f;
 	JumpStaminaCost = 25.0f;
-	InteractRange = 170.0f;
 	RespawnDuration = 5.0f;
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
@@ -229,51 +233,10 @@ void ASeniorProjectCharacter::AttemptJump()
 	}
 }
 
-void ASeniorProjectCharacter::Interact()
-{
-	FVector Start = InteractComp->GetComponentLocation();
-	FVector End = Start + FollowCamera->GetForwardVector() * InteractRange;
-	AActor* Actor = LineTraceComp->LineTraceSingle(Start, End, INTERACTABLE_CHANNEL, true);
-	if(Actor)
-	{
-		AItem* Pickup = Cast<AItem>(Actor);
-		if(IInteractableInterface* Interface = Cast<IInteractableInterface>(Pickup))
-		{
-			Interface->Interact(this);
-		}
-	}
-}
-
-bool ASeniorProjectCharacter::ServerInteract_Validate(AActor* Actor)
-{
-	return true;
-}
-
-void ASeniorProjectCharacter::ServerInteract_Implementation(AActor* Actor)
-{
-	if(GetOwner()->GetLocalRole() == ROLE_Authority)
-	{
-		FVector Start = InteractComp->GetComponentLocation();
-		FVector End = Actor->GetActorLocation();
-		AActor* HitActor = LineTraceComp->LineTraceSingle(Start, End, INTERACTABLE_CHANNEL, true);
-		if(Actor)
-		{
-			AItem* Item = Cast<AItem>(HitActor);
-			if(Item)
-			{
-				if(Item == Actor)
-				{
-					InventoryComp->AddItem(Item);
-				}
-			}
-		}
-	}
-}
-
 void ASeniorProjectCharacter::Attack()
 {
 	FVector Start = InteractComp->GetComponentLocation();
-	FVector End = Start + FollowCamera->GetForwardVector() * InteractRange;
+	FVector End = Start + FollowCamera->GetForwardVector() * InteractComp->GetInteractRange();
 	AActor* Actor = LineTraceComp->LineTraceSingle(Start, End, INTERACTABLE_CHANNEL, true);
 	if(Actor)
 	{
@@ -316,7 +279,7 @@ void ASeniorProjectCharacter::Die()
 {
 	if(GetLocalRole() == ROLE_Authority)
 	{
-		InventoryComp->DropAllInventoryItems();
+		//InventoryComp->DropAllInventoryItems();
 		MultiDie();
 		//Start destroy timer to remove player actor from world
 		GetWorld()->GetTimerManager().SetTimer(DestroyHandle, this, &ASeniorProjectCharacter::CallDestroy,
@@ -334,4 +297,33 @@ void ASeniorProjectCharacter::MultiDie_Implementation()
 	this->GetCharacterMovement()->DisableMovement();
 	this->GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 	this->GetMesh()->SetAllBodiesSimulatePhysics(true);
+}
+
+void ASeniorProjectCharacter::UsePickup(TSubclassOf<AItem> ItemSubClass)
+{
+	if(ItemSubClass)
+	{
+		if(AItem* Item = ItemSubClass.GetDefaultObject())
+		{
+			Item->Use(this);
+		}
+		ServerUsePickup(ItemSubClass);
+	}
+}
+
+bool ASeniorProjectCharacter::ServerUsePickup_Validate(TSubclassOf<AItem> ItemSubClass)
+{
+	return true;
+}
+
+void ASeniorProjectCharacter::ServerUsePickup_Implementation(TSubclassOf<AItem> ItemSubClass)
+{
+	for(FItemData& Item : InventoryComp->GetInventoryItems())
+	{
+		if(Item.ItemClass == ItemSubClass)
+		{
+			UsePickup(ItemSubClass);
+			return;
+		}
+	}
 }

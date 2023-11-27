@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "Components/WidgetComponent.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
@@ -9,8 +10,7 @@
 #include "SeniorProjectCharacter.generated.h"
 
 
-struct FItemData;
-class AItem;
+class UWidgetComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FItemPickedUp, FItemData, ItemData);
 
@@ -60,12 +60,14 @@ public:
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
 	class URInventoryComponent* InventoryComp;
 
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
+	class UWidgetComponent* PlayerNameTagComp;
+
 	//Delegates
 	UPROPERTY(BlueprintAssignable)
 	FItemPickedUp ItemPickedUp;
 
 protected:
-	float InteractRange;
 	float RespawnDuration;
 
 	//Stamina Properties
@@ -90,11 +92,22 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void StopSprinting();
 
+	UFUNCTION(BlueprintCallable)
 	void HandleSprinting();
 
+	UFUNCTION(BlueprintCallable)
 	void AttemptJump();
 
+	UFUNCTION(BlueprintCallable)
 	void Die();
+
+	UFUNCTION(BlueprintCallable)
+	void UsePickup(TSubclassOf<AItem> ItemSubClass);
+	
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerUsePickup(TSubclassOf<AItem> ItemSubClass);
+	bool ServerUsePickup_Validate(TSubclassOf<AItem> ItemSubClass);
+	void ServerUsePickup_Implementation(TSubclassOf<AItem> ItemSubClass);
 
 	UFUNCTION(NetMulticast, Reliable, WithValidation)
 	void MultiDie();
@@ -109,14 +122,6 @@ protected:
 	bool ServerAttack_Validate(AActor* Actor);
 	void ServerAttack_Implementation(AActor* Actor);
 
-	UFUNCTION(BlueprintCallable)
-	void Interact();
-	
-	UFUNCTION(Server, Reliable, WithValidation)
-	void ServerInteract(AActor* Actor);
-	bool ServerInteract_Validate(AActor* Actor);
-	void ServerInteract_Implementation(AActor* Actor);
-
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -129,7 +134,7 @@ protected:
 
 	// Gets player's inventory component
 	UFUNCTION(BlueprintCallable)
-	URInventoryComponent* GetInventoryComp() const {return InventoryComp;}
+	URInventoryComponent* GetInventoryComp() const { return InventoryComp; }
 
 public:
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator,
@@ -140,4 +145,6 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	/** Returns InteractComponent subobject **/
+	FORCEINLINE class URInteractComponent* GetInteractComponent() const { return InteractComp; }
 };

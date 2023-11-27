@@ -36,23 +36,17 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Enums")
 	EPickupItemType PickupType;
-
-	UPROPERTY(ReplicatedUsing = OnRep_PickedUp)
-	bool bObjectPickedUp;
-
+	
 	UPROPERTY(EditDefaultsOnly)
 	FItemData ItemData;
-	
-	UFUNCTION()
-	void OnRep_PickedUp();
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:
-	void UseItem(ASeniorProjectCharacter* Player);
 	void InInventory(bool In);
 	virtual void Interact(ASeniorProjectCharacter* Player) override;
+	virtual void Use(ASeniorProjectCharacter* Player) override;
 	FItemData GetItemData() const {return ItemData;}
 };

@@ -5,17 +5,35 @@
 
 #include "Net/UnrealNetwork.h"
 #include "..\Environment\Item.h"
+
 // Sets default values for this component's properties
 URInventoryComponent::URInventoryComponent()
 {
-	
 }
 
 // Called when the game starts
 void URInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	// ...
+	Player = Cast<ASeniorProjectCharacter>(GetOwner());
+	SetIsReplicated(true);
+}
+
+void URInventoryComponent::AddItem(FItemData ItemData)
+{
+	if(Player->HasAuthority())
+	{
+		InventoryItems.Add(ItemData);
+		OnRep_ItemPickedUp();
+	}
+}
+
+void URInventoryComponent::OnRep_ItemPickedUp()
+{
+	if(InventoryItems.Num())
+	{
+		Player->ItemPickedUp.Broadcast(InventoryItems[InventoryItems.Num() - 1]);
+	}
 }
 
 void URInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -23,58 +41,5 @@ void URInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	//Replicates to everyone
-	DOREPLIFETIME_CONDITION(URInventoryComponent, Items, COND_OwnerOnly);
-}
-
-
-bool URInventoryComponent::AddItem(AItem* Item)
-{
-	Items.Add(Item);
-	Item->InInventory(true);
-
-	for(AItem* Pickup : Items)
-	{
-		FString Tempstr = "";
-		FString str = Tempstr.Append(Pickup->GetName());
-		GEngine->AddOnScreenDebugMessage(-1, 3, FColor::Cyan, str);
-	}
-	return false;
-}
-
-void URInventoryComponent::DropItem(AItem* Item)
-{
-	if(GetOwnerRole() == ROLE_Authority)
-	{
-		FVector Location = GetOwner()->GetActorLocation();
-		Location.X += FMath::RandRange(-50.0f, 100.0f);
-		Location.Y += FMath::RandRange(-50.0f, 100.0f);
-		FVector EndRay = Location;
-		EndRay.Z -= 10000.0f;
-		FHitResult HitResult;
-		FCollisionObjectQueryParams ObjQuery;
-		FCollisionQueryParams CollisionsParams;
-		CollisionsParams.AddIgnoredActor(GetOwner());
-		
-		GetWorld()->LineTraceSingleByObjectType(OUT HitResult, Location, EndRay, ObjQuery, CollisionsParams);
-
-		if(HitResult.ImpactPoint != FVector::ZeroVector)
-		{
-			Location = HitResult.ImpactPoint;
-		}
-
-		Item->SetActorLocation(Location);
-		Item->InInventory(false);
-	}
-}
-
-void URInventoryComponent::DropAllInventoryItems()
-{
-	if(GetOwnerRole() == ROLE_Authority)
-	{
-		for(AItem* Pickup : Items)
-		{
-			DropItem(Pickup);
-		}
-		Items.Empty();
-	}
+	DOREPLIFETIME_CONDITION(URInventoryComponent, InventoryItems, COND_OwnerOnly);
 }
