@@ -14,6 +14,8 @@ class UWidgetComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FItemPickedUp, FItemData, ItemData);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FItemStackSizeUpdated, const TArray<FItemData>&, NewInventoryItems);
+
 UCLASS(config=Game)
 class ASeniorProjectCharacter : public ACharacter
 {
@@ -67,6 +69,9 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FItemPickedUp ItemPickedUp;
 
+	UPROPERTY(BlueprintAssignable)
+	FItemStackSizeUpdated ItemStackSizeUpdated;
+
 protected:
 	float RespawnDuration;
 
@@ -103,7 +108,7 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void UsePickup(TSubclassOf<AItem> ItemSubClass);
-	
+
 	UFUNCTION(Server, Reliable, WithValidation)
 	void ServerUsePickup(TSubclassOf<AItem> ItemSubClass);
 	bool ServerUsePickup_Validate(TSubclassOf<AItem> ItemSubClass);

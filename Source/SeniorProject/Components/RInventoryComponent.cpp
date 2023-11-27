@@ -23,8 +23,33 @@ void URInventoryComponent::AddItem(FItemData ItemData)
 {
 	if(Player->HasAuthority())
 	{
-		InventoryItems.Add(ItemData);
-		OnRep_ItemPickedUp();
+		bool bIsNewItem = true;
+		for(FItemData& Item : InventoryItems)
+		{
+			if(Item.ItemClass == ItemData.ItemClass)
+			{
+				Item.CurrentStackCount++;
+				if(Item.CurrentStackCount >= Item.MaxStackSize)
+				{
+					bIsNewItem = true;
+					
+				}
+				else
+				{
+					bIsNewItem = false;
+				}
+			}
+		}
+		if(bIsNewItem)
+		{
+			InventoryItems.Add(ItemData);
+			ItemData.CurrentStackCount++;
+			OnRep_ItemPickedUp();
+		}
+		else
+		{
+			Player->ItemStackSizeUpdated.Broadcast(InventoryItems);
+		}
 	}
 }
 
