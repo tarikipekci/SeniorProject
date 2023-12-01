@@ -25,6 +25,8 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+	void PerformInteractCheck();
+
 	UFUNCTION(BlueprintCallable)
 	void Pickup();
 
@@ -32,6 +34,10 @@ protected:
 	void ServerPickup(AActor* Actor);
 	bool ServerPickup_Validate(AActor* Actor);
 	void ServerPickup_Implementation(AActor* Actor);
+
+public:
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
+		FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
 	ASeniorProjectCharacter* Player;

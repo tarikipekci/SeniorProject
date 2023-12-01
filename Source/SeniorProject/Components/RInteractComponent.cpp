@@ -12,6 +12,7 @@
 // Sets default values for this component's properties
 URInteractComponent::URInteractComponent()
 {
+	PrimaryComponentTick.bCanEverTick = true;
 	InteractRange = 200.0f;
 }
 
@@ -21,6 +22,28 @@ void URInteractComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	Player = Cast<ASeniorProjectCharacter>(GetOwner());
+}
+
+
+void URInteractComponent::TickComponent(float DeltaTime, ELevelTick TickType,
+                                        FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	PerformInteractCheck();
+}
+
+void URInteractComponent::PerformInteractCheck()
+{
+	FVector Start = Player->InteractComp->GetComponentLocation();
+	FVector End = Start + Player->GetFollowCamera()->GetForwardVector() * InteractRange;
+	AActor* Actor = Player->LineTraceComp->LineTraceSingle(Start, End, INTERACTABLE_CHANNEL, false);
+	if(Actor)
+	{
+		if(AItem* Item = Cast<AItem>(Actor))
+		{
+		}
+	}
 }
 
 void URInteractComponent::Pickup()

@@ -21,5 +21,8 @@ struct FItemData
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	int MaxStackSize;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	bool bIsFull = false;
 };
 

@@ -19,39 +19,40 @@ void URInventoryComponent::BeginPlay()
 	SetIsReplicated(true);
 }
 
+
 void URInventoryComponent::AddItem(FItemData ItemData)
 {
 	if(Player->HasAuthority())
 	{
-		bool bIsNewItem = true;
+		int TotalCountOfItemData = 0;
+		TArray<FItemData> FullSlotsOfItemData;
 		for(FItemData& Item : InventoryItems)
 		{
 			if(Item.ItemClass == ItemData.ItemClass)
 			{
-				Item.CurrentStackCount++;
-				if(Item.CurrentStackCount >= Item.MaxStackSize)
+				TotalCountOfItemData++;
+				if(!Item.bIsFull)
 				{
-					bIsNewItem = true;
-					
+					Item.CurrentStackCount++;
+					if(Item.CurrentStackCount >= Item.MaxStackSize)
+					{
+						Item.bIsFull = true;
+					}
+					break;
 				}
-				else
-				{
-					bIsNewItem = false;
-				}
+				FullSlotsOfItemData.Add(Item);
 			}
 		}
-		if(bIsNewItem)
+		if(TotalCountOfItemData == FullSlotsOfItemData.Num())
 		{
-			InventoryItems.Add(ItemData);
 			ItemData.CurrentStackCount++;
+			InventoryItems.Add(ItemData);
 			OnRep_ItemPickedUp();
 		}
-		else
-		{
-			Player->ItemStackSizeUpdated.Broadcast(InventoryItems);
-		}
+		Player->ItemStackSizeUpdated.Broadcast(InventoryItems);
 	}
 }
+
 
 void URInventoryComponent::OnRep_ItemPickedUp()
 {
