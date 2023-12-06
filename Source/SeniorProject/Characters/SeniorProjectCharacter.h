@@ -12,9 +12,7 @@
 
 class UWidgetComponent;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FItemPickedUp, FItemData, ItemData);
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FItemStackSizeUpdated, const TArray<FItemData>&, NewInventoryItems);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FItemPickedUp, FItemData, ItemData, const TArray<FItemData>&, NewInventoryItems, bool, bIsNewItem);
 
 UCLASS(config=Game)
 class ASeniorProjectCharacter : public ACharacter
@@ -68,9 +66,6 @@ public:
 	//Delegates
 	UPROPERTY(BlueprintAssignable)
 	FItemPickedUp ItemPickedUp;
-
-	UPROPERTY(BlueprintAssignable)
-	FItemStackSizeUpdated ItemStackSizeUpdated;
 
 protected:
 	float RespawnDuration;

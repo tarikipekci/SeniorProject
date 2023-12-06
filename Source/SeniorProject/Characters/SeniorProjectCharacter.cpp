@@ -237,7 +237,7 @@ void ASeniorProjectCharacter::Attack()
 {
 	FVector Start = InteractComp->GetComponentLocation();
 	FVector End = Start + FollowCamera->GetForwardVector() * InteractComp->GetInteractRange();
-	AActor* Actor = LineTraceComp->LineTraceSingle(Start, End, INTERACTABLE_CHANNEL, true);
+	AActor* Actor = LineTraceComp->LineTraceSingle(Start, End, INTERACTABLE_CHANNEL, false);
 	if(Actor)
 	{
 		ASeniorProjectCharacter* Player = Cast<ASeniorProjectCharacter>(Actor);
@@ -318,7 +318,7 @@ bool ASeniorProjectCharacter::ServerUsePickup_Validate(TSubclassOf<AItem> ItemSu
 
 void ASeniorProjectCharacter::ServerUsePickup_Implementation(TSubclassOf<AItem> ItemSubClass)
 {
-	for(FItemData& Item : InventoryComp->GetInventoryItems())
+	for(FItemData Item : InventoryComp->GetInventoryItems())
 	{
 		if(Item.ItemClass == ItemSubClass)
 		{

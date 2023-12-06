@@ -4,7 +4,7 @@
 #include "RInventoryComponent.h"
 
 #include "Net/UnrealNetwork.h"
-#include "..\Environment\Item.h"
+#include "../Environment/Item.h"
 
 // Sets default values for this component's properties
 URInventoryComponent::URInventoryComponent()
@@ -34,6 +34,8 @@ void URInventoryComponent::AddItem(FItemData ItemData)
 				if(!Item.bIsFull)
 				{
 					Item.CurrentStackCount++;
+					bIsNewItem = false;
+					OnRep_ItemPickedUp();
 					if(Item.CurrentStackCount >= Item.MaxStackSize)
 					{
 						Item.bIsFull = true;
@@ -45,20 +47,19 @@ void URInventoryComponent::AddItem(FItemData ItemData)
 		}
 		if(TotalCountOfItemData == FullSlotsOfItemData.Num())
 		{
+			bIsNewItem = true;
 			ItemData.CurrentStackCount++;
 			InventoryItems.Add(ItemData);
 			OnRep_ItemPickedUp();
 		}
-		Player->ItemStackSizeUpdated.Broadcast(InventoryItems);
 	}
 }
-
 
 void URInventoryComponent::OnRep_ItemPickedUp()
 {
 	if(InventoryItems.Num())
 	{
-		Player->ItemPickedUp.Broadcast(InventoryItems[InventoryItems.Num() - 1]);
+		Player->ItemPickedUp.Broadcast(InventoryItems[InventoryItems.Num() - 1], InventoryItems, bIsNewItem);
 	}
 }
 
@@ -68,4 +69,5 @@ void URInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 
 	//Replicates to everyone
 	DOREPLIFETIME_CONDITION(URInventoryComponent, InventoryItems, COND_OwnerOnly);
+	DOREPLIFETIME_CONDITION(URInventoryComponent, bIsNewItem, COND_OwnerOnly);
 }

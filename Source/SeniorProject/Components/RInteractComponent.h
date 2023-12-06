@@ -4,10 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
+#include "SeniorProject/Structs/FItemData.h"
 #include "RInteractComponent.generated.h"
 
-
+struct FItemData;
+class UInteractableInterface;
+class IInteractableInterface;
 class ASeniorProjectCharacter;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInteractionFound, FItemData, ItemData);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class SENIORPROJECT_API URInteractComponent : public USceneComponent
@@ -18,30 +23,42 @@ public:
 	// Sets default values for this component's properties
 	URInteractComponent();
 
-public:
+	UPROPERTY(BlueprintAssignable)
+	FInteractionFound InteractionFound;
+
+	UFUNCTION(BlueprintCallable)
 	float GetInteractRange() const { return InteractRange; }
+
+	UFUNCTION(BlueprintCallable)
+	bool GetIsInteracting() const { return bIsInteracting; }
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-	void PerformInteractCheck();
+	UInteractableInterface* PerformInteractCheck();
 
 	UFUNCTION(BlueprintCallable)
-	void Pickup();
+	void Interact();
 
 	UFUNCTION(Server, Reliable, WithValidation)
-	void ServerPickup(AActor* Actor);
-	bool ServerPickup_Validate(AActor* Actor);
-	void ServerPickup_Implementation(AActor* Actor);
+	void ServerPickup(const AActor* Actor);
+	bool ServerPickup_Validate(const AActor* Actor);
+	void ServerPickup_Implementation(const AActor* Actor);
 
 public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
-		FActorComponentTickFunction* ThisTickFunction) override;
+	                           FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
 	ASeniorProjectCharacter* Player;
 
 	UPROPERTY()
 	float InteractRange;
+
+	UPROPERTY()
+	bool bIsInteracting;
+
+	UPROPERTY()
+	AActor* InteractedActor;
 };

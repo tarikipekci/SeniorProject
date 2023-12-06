@@ -10,11 +10,6 @@
 
 class ASeniorProjectCharacter;
 
-namespace EQSDebug
-{
-	struct FItemData;
-}
-
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class SENIORPROJECT_API URInventoryComponent : public UActorComponent
 {
@@ -40,8 +35,11 @@ public:
 	void OnRep_ItemPickedUp();
 	
 	UFUNCTION(BlueprintCallable)
-	TArray<FItemData> GetInventoryItems() const {return InventoryItems;};
+	const TArray<FItemData>& GetInventoryItems() const {return InventoryItems;};
 
 private:
 	ASeniorProjectCharacter* Player;
+
+	UPROPERTY(Replicated)
+	bool bIsNewItem;
 };

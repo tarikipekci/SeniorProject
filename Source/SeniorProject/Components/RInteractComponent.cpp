@@ -22,6 +22,7 @@ void URInteractComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	Player = Cast<ASeniorProjectCharacter>(GetOwner());
+	checkf(Player,TEXT(""));
 }
 
 
@@ -33,45 +34,52 @@ void URInteractComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	PerformInteractCheck();
 }
 
-void URInteractComponent::PerformInteractCheck()
+UInteractableInterface* URInteractComponent::PerformInteractCheck()
 {
 	FVector Start = Player->InteractComp->GetComponentLocation();
 	FVector End = Start + Player->GetFollowCamera()->GetForwardVector() * InteractRange;
 	AActor* Actor = Player->LineTraceComp->LineTraceSingle(Start, End, INTERACTABLE_CHANNEL, false);
 	if(Actor)
 	{
-		if(AItem* Item = Cast<AItem>(Actor))
+		if(Actor->GetClass()->ImplementsInterface(UInteractableInterface::StaticClass()))
 		{
+			UInteractableInterface* Interface = Cast<UInteractableInterface>(InteractedActor);
+			InteractedActor = Actor;
+			if(AItem* Item = Cast<AItem>(InteractedActor))
+			{
+				InteractionFound.Broadcast(Item->GetItemData());
+			}
+			bIsInteracting = true;
+			return Interface;
 		}
 	}
+	bIsInteracting = false;
+	return nullptr;
 }
 
-void URInteractComponent::Pickup()
+void URInteractComponent::Interact()
 {
-	FVector Start = Player->InteractComp->GetComponentLocation();
-	FVector End = Start + Player->GetFollowCamera()->GetForwardVector() * InteractRange;
-	AActor* Actor = Player->LineTraceComp->LineTraceSingle(Start, End, INTERACTABLE_CHANNEL, true);
-	if(Actor)
+	if(InteractedActor && bIsInteracting)
 	{
-		if(AItem* Item = Cast<AItem>(Actor))
+		if(AItem* Item = Cast<AItem>(InteractedActor))
 		{
 			ServerPickup(Item);
 		}
 	}
 }
 
-bool URInteractComponent::ServerPickup_Validate(AActor* Actor)
+bool URInteractComponent::ServerPickup_Validate(const AActor* Actor)
 {
 	return true;
 }
 
-void URInteractComponent::ServerPickup_Implementation(AActor* Actor)
+void URInteractComponent::ServerPickup_Implementation(const AActor* Actor)
 {
 	if(Player->HasAuthority())
 	{
 		FVector Start = Player->InteractComp->GetComponentLocation();
 		FVector End = Actor->GetActorLocation();
-		AActor* HitActor = Player->LineTraceComp->LineTraceSingle(Start, End, INTERACTABLE_CHANNEL, true);
+		AActor* HitActor = Player->LineTraceComp->LineTraceSingle(Start, End, INTERACTABLE_CHANNEL, false);
 		if(Actor)
 		{
 			if(HitActor == Actor)
