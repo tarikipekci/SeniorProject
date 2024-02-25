@@ -9,6 +9,7 @@
 // Sets default values for this component's properties
 URInventoryComponent::URInventoryComponent()
 {
+	itemIndex = 0;
 }
 
 // Called when the game starts
@@ -17,17 +18,80 @@ void URInventoryComponent::BeginPlay()
 	Super::BeginPlay();
 	Player = Cast<ASeniorProjectCharacter>(GetOwner());
 	SetIsReplicated(true);
+	InitializeInventory();
 }
 
-
-void URInventoryComponent::AddItem(FItemData ItemData)
+bool URInventoryComponent::AddItem(FItemData ItemData)
 {
+	if(!ItemData.ItemClass)
+	{
+		return false;
+	}
+
+	bool bAdded = false;
+	int EmptySlotIndex = -1;
+
+	for(int i = 0; i < InventoryItems.Num(); i++)
+	{
+		FItemData& Item = InventoryItems[i];
+
+		if(!Item.ItemClass && EmptySlotIndex == -1)
+		{
+			EmptySlotIndex = i;
+		}
+
+		if(Item.ItemClass == ItemData.ItemClass)
+		{
+			int AvailableSize = Item.MaxStackSize - Item.CurrentStackCount;
+			int NeededSize = ItemData.CurrentStackCount;
+
+			if(AvailableSize <= 0)
+			{
+				continue;
+			}
+
+			if(AvailableSize >= NeededSize)
+			{
+				Item.CurrentStackCount += ItemData.CurrentStackCount;
+				bAdded = true;
+				break;
+			}
+			else
+			{
+				int RemainingCount = NeededSize - AvailableSize;
+				Item.CurrentStackCount = Item.MaxStackSize;
+				ItemData.CurrentStackCount = RemainingCount;
+			}
+		}
+	}
+
+	if(!bAdded && EmptySlotIndex >= 0)
+	{
+		InventoryItems[EmptySlotIndex] = ItemData;
+		bAdded = true;
+	}
+
+	if(bAdded)
+	{
+		OnRep_InventoryUpdated();
+	}
+	return bAdded;
+	
+	/*return;
 	if(Player->HasAuthority())
 	{
 		int TotalCountOfItemData = 0;
+		int slotIndex = -1;
+		bool emptySlotFound = false;
 		TArray<FItemData> FullSlotsOfItemData;
 		for(FItemData& Item : InventoryItems)
 		{
+			slotIndex++;
+			if(!Item.ItemClass && emptySlotFound == false)
+			{
+				emptySlotFound = true;
+				itemIndex = slotIndex;
+			}
 			if(Item.ItemClass == ItemData.ItemClass)
 			{
 				TotalCountOfItemData++;
@@ -35,7 +99,8 @@ void URInventoryComponent::AddItem(FItemData ItemData)
 				{
 					Item.CurrentStackCount++;
 					bIsNewItem = false;
-					OnRep_ItemPickedUp();
+					itemIndex = slotIndex;
+					OnRep_ItemPickedUp(); //Updated existing item
 					if(Item.CurrentStackCount >= Item.MaxStackSize)
 					{
 						Item.bIsFull = true;
@@ -50,16 +115,50 @@ void URInventoryComponent::AddItem(FItemData ItemData)
 			bIsNewItem = true;
 			ItemData.CurrentStackCount++;
 			InventoryItems.Add(ItemData);
-			OnRep_ItemPickedUp();
+			OnRep_ItemPickedUp(); //Added new item
 		}
+	}*/
+}
+
+void URInventoryComponent::SwapItems(int index1, int index2)
+{
+	
+}
+
+void URInventoryComponent::OnRep_InventoryUpdated()
+{
+	if(Player)
+	{
+		Player->InventoryUpdated.Broadcast(InventoryItems);
+	}
+	/*if(InventoryItems.Num() > 0)
+	{
+		Player->ItemPickedUp.Broadcast(InventoryItems[InventoryItems.Num() - 1], InventoryItems, bIsNewItem,
+		                               itemIndex);
+	}*/
+}
+
+void URInventoryComponent::DecreaseItemAmount(FItemData ItemData, int SlotIndex)
+{
+	ItemData.CurrentStackCount--;
+	if(ItemData.CurrentStackCount <= 0)
+	{
+		RemoveItem(SlotIndex);
 	}
 }
 
-void URInventoryComponent::OnRep_ItemPickedUp()
+void URInventoryComponent::RemoveItem(int SlotIndex)
 {
-	if(InventoryItems.Num())
+	InventoryItems.RemoveAt(SlotIndex);
+}
+
+void URInventoryComponent::InitializeInventory()
+{
+	InventoryItems.Reserve(12);
+
+	for(int i = 0; i < 12; i++)
 	{
-		Player->ItemPickedUp.Broadcast(InventoryItems[InventoryItems.Num() - 1], InventoryItems, bIsNewItem);
+		InventoryItems.Emplace();
 	}
 }
 

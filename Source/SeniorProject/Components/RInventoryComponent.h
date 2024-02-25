@@ -10,6 +10,7 @@
 
 class ASeniorProjectCharacter;
 
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class SENIORPROJECT_API URInventoryComponent : public UActorComponent
 {
@@ -20,7 +21,7 @@ public:
 	URInventoryComponent();
 
 protected:
-	UPROPERTY(ReplicatedUsing= OnRep_ItemPickedUp, BlueprintReadWrite, Category="Inventory")
+	UPROPERTY(ReplicatedUsing= OnRep_InventoryUpdated, BlueprintReadWrite, Category="Inventory")
 	TArray<FItemData> InventoryItems;
 
 protected:
@@ -29,17 +30,39 @@ protected:
 
 public:
 	UFUNCTION(BlueprintCallable)
-	void AddItem(FItemData ItemData);
+	bool AddItem(FItemData ItemData);
+
+	UFUNCTION(BlueprintCallable)
+	void SwapItems(int index1, int index2);
 
 	UFUNCTION()
-	void OnRep_ItemPickedUp();
+	void OnRep_InventoryUpdated();
+
+	UFUNCTION(BlueprintCallable)
+	void DecreaseItemAmount(FItemData ItemData, int SlotIndex);
+
+	UFUNCTION(BlueprintCallable)
+	void RemoveItem(int SlotIndex);
 	
 	UFUNCTION(BlueprintCallable)
-	const TArray<FItemData>& GetInventoryItems() const {return InventoryItems;};
+	const TArray<FItemData>& GetInventoryItems() const {return InventoryItems;}
 
+	UFUNCTION(BlueprintCallable)
+	void SetInventoryItems(TArray<FItemData> NewInventoryItems)
+	{
+		InventoryItems = NewInventoryItems;
+	}
+
+	UFUNCTION()
+	void InitializeInventory();
+	
 private:
+	UPROPERTY()
 	ASeniorProjectCharacter* Player;
 
 	UPROPERTY(Replicated)
 	bool bIsNewItem;
+
+	UPROPERTY()
+	int itemIndex;
 };

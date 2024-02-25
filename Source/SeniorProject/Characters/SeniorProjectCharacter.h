@@ -10,9 +10,14 @@
 #include "SeniorProjectCharacter.generated.h"
 
 
+class URInventoryComponent;
+class URInteractComponent;
+class URLineTraceComponent;
+class URPlayerStatComponent;
 class UWidgetComponent;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FItemPickedUp, FItemData, ItemData, const TArray<FItemData>&, NewInventoryItems, bool, bIsNewItem);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FItemPickedUp, FItemData, ItemData, const TArray<FItemData>&, NewInventoryItems, bool, bIsNewItem, int, itemIndex);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInventoryUpdated, const TArray<FItemData>&, InventoryItems);
 
 UCLASS(config=Game)
 class ASeniorProjectCharacter : public ACharacter
@@ -37,11 +42,11 @@ class ASeniorProjectCharacter : public ACharacter
 
 	/** Move Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	class UInputAction* MoveAction;
+	UInputAction* MoveAction;
 
 	/** Look Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	class UInputAction* LookAction;
+	UInputAction* LookAction;
 
 public:
 	ASeniorProjectCharacter();
@@ -49,23 +54,26 @@ public:
 	//Player Components
 
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
-	class URPlayerStatComponent* PlayerStatComp;
+	URPlayerStatComponent* PlayerStatComp;
 
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
-	class URLineTraceComponent* LineTraceComp;
+	URLineTraceComponent* LineTraceComp;
 
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
-	class URInteractComponent* InteractComp;
+	URInteractComponent* InteractComp;
 
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
-	class URInventoryComponent* InventoryComp;
+	URInventoryComponent* InventoryComp;
 
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
-	class UWidgetComponent* PlayerNameTagComp;
+	UWidgetComponent* PlayerNameTagComp;
 
 	//Delegates
 	UPROPERTY(BlueprintAssignable)
 	FItemPickedUp ItemPickedUp;
+
+	UPROPERTY(BlueprintAssignable)
+	FInventoryUpdated InventoryUpdated;
 
 protected:
 	float RespawnDuration;
@@ -103,7 +111,7 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void UsePickup(TSubclassOf<AItem> ItemSubClass);
-
+	
 	UFUNCTION(Server, Reliable, WithValidation)
 	void ServerUsePickup(TSubclassOf<AItem> ItemSubClass);
 	bool ServerUsePickup_Validate(TSubclassOf<AItem> ItemSubClass);

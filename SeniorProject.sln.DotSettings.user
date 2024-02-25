@@ -3,5 +3,6 @@
   &lt;Project Location="E:\SeniorProjectGit" Presentation="&amp;lt;Engine&amp;gt;" /&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=ARHUD/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=Interactable/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=subobject/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=Tempstr/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>

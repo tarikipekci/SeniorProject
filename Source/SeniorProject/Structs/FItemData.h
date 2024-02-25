@@ -16,8 +16,8 @@ struct FItemData
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	FName ItemName;
 
-	UPROPERTY(BlueprintReadWrite)
-	int CurrentStackCount;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int CurrentStackCount = 1;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	int MaxStackSize;
