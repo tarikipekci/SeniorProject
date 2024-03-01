@@ -21,14 +21,17 @@ AItem::AItem()
 void AItem::BeginPlay()
 {
 	Super::BeginPlay();
+	ItemData.ItemActor = this;
 }
 
 void AItem::Interact(ASeniorProjectCharacter* Player)
 {
 	if(HasAuthority() && Player)
 	{
-		Player->InventoryComp->AddItem(ItemData);
-		Destroy();
+		if(Player->InventoryComp->AddItem(ItemData))
+		{
+			DestroyItem();
+		}
 	}
 }
 
@@ -36,19 +39,22 @@ void AItem::Use(ASeniorProjectCharacter* Player)
 {
 	IInteractableInterface::Use(Player);
 
-	if(GetLocalRole() == ROLE_Authority)
+	if(ItemType == EItemType::EEdible)
 	{
-		if(PickupType == EPickupItemType::EEdible)
-		{
-			Player->PlayerStatComp->DecreaseHunger(ChangeAmount);
-		}
-		else if(PickupType == EPickupItemType::EDrinkable)
-		{
-			Player->PlayerStatComp->DecreaseThirst(ChangeAmount);
-		}
-		else if(PickupType == EPickupItemType::EHealth)
-		{
-			Player->PlayerStatComp->IncreaseHealth(ChangeAmount);
-		}
+		Player->PlayerStatComp->DecreaseHunger(ChangeAmount);
 	}
+	else if(ItemType == EItemType::EDrinkable)
+	{
+		Player->PlayerStatComp->DecreaseThirst(ChangeAmount);
+	}
+	else if(ItemType == EItemType::EHealth)
+	{
+		Player->PlayerStatComp->IncreaseHealth(ChangeAmount);
+	}
+}
+
+void AItem::DestroyItem_Implementation()
+{
+	SetActorHiddenInGame(true);
+	SetActorEnableCollision(false);
 }

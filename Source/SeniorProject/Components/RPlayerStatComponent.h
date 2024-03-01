@@ -80,34 +80,24 @@ protected:
 	void HandleHungerAndThirst();
 
 	//Server function of IncreaseHunger
-	UFUNCTION(Server, Reliable, WithValidation)
+	UFUNCTION(Server, Reliable)
 	void ServerIncreaseHunger(float Value);
-	bool ServerIncreaseHunger_Validate(float Value);
-	void ServerIncreaseHunger_Implementation(float Value);
 
 	//Server function of IncreaseThirst
-	UFUNCTION(Server, Reliable, WithValidation)
+	UFUNCTION(Server, Reliable)
 	void ServerIncreaseThirst(float Value);
-	bool ServerIncreaseThirst_Validate(float Value);
-	void ServerIncreaseThirst_Implementation(float Value);
 
 	//Server function of DecreaseStamina
-	UFUNCTION(Server, Reliable, WithValidation)
+	UFUNCTION(Server, Reliable)
 	void ServerDecreaseStamina(float Value);
-	bool ServerDecreaseStamina_Validate(float Value);
-	void ServerDecreaseStamina_Implementation(float Value);
 
 	//Server function of ControlSprintingTimer
-	UFUNCTION(Server, Reliable, WithValidation)
+	UFUNCTION(Server, Reliable)
 	void ServerControlSprintingTimer(bool IsSprinting);
-	bool ServerControlSprintingTimer_Validate(bool IsSprinting);
-	void ServerControlSprintingTimer_Implementation(bool IsSprinting);
 
 	//Server function of DecreaseHealth
-	UFUNCTION(Server, Reliable, WithValidation)
+	UFUNCTION(Server, Reliable)
 	void ServerDecreaseHealth(float Value);
-	bool ServerDecreaseHealth_Validate(float Value);
-	void ServerDecreaseHealth_Implementation(float Value);
 
 public:
 	void ControlSprintingTimer(bool IsSprinting);

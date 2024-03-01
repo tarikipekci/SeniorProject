@@ -16,7 +16,7 @@ URPlayerStatComponent::URPlayerStatComponent()
 	DefaultHunger = 0.0f;
 	MaxHunger = 100.0f;
 	Hunger = DefaultHunger;
-	HungerDecrementValue = 0.3;
+	HungerDecrementValue = 0.3f;
 
 	//Thirst
 	DefaultThirst = 0.0f;
@@ -171,11 +171,6 @@ void URPlayerStatComponent::DecreaseThirst(float Value)
 	}
 }
 
-bool URPlayerStatComponent::ServerIncreaseHunger_Validate(float Value)
-{
-	return true;
-}
-
 void URPlayerStatComponent::ServerIncreaseHunger_Implementation(float Value)
 {
 	if(GetOwnerRole() == ROLE_Authority)
@@ -184,22 +179,12 @@ void URPlayerStatComponent::ServerIncreaseHunger_Implementation(float Value)
 	}
 }
 
-bool URPlayerStatComponent::ServerIncreaseThirst_Validate(float Value)
-{
-	return true;
-}
-
 void URPlayerStatComponent::ServerIncreaseThirst_Implementation(float Value)
 {
 	if(GetOwnerRole() == ROLE_Authority)
 	{
 		IncreaseThirst(Value);
 	}
-}
-
-bool URPlayerStatComponent::ServerDecreaseStamina_Validate(float Value)
-{
-	return true;
 }
 
 void URPlayerStatComponent::ServerDecreaseStamina_Implementation(float Value)
@@ -259,11 +244,6 @@ void URPlayerStatComponent::ControlSprintingTimer(bool IsSprinting) //make it pa
 	}
 }
 
-bool URPlayerStatComponent::ServerControlSprintingTimer_Validate(bool IsSprinting)
-{
-	return true;
-}
-
 void URPlayerStatComponent::ServerControlSprintingTimer_Implementation(bool IsSprinting)
 {
 	if(GetOwnerRole() == ROLE_Authority)
@@ -282,11 +262,6 @@ void URPlayerStatComponent::DecreaseHealth(float Value)
 	{
 		Health -= Value;
 	}
-}
-
-bool URPlayerStatComponent::ServerDecreaseHealth_Validate(float Value)
-{
-	return true;
 }
 
 void URPlayerStatComponent::ServerDecreaseHealth_Implementation(float Value)

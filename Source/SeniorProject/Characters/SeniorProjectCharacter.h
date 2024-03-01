@@ -16,9 +16,6 @@ class URLineTraceComponent;
 class URPlayerStatComponent;
 class UWidgetComponent;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FItemPickedUp, FItemData, ItemData, const TArray<FItemData>&, NewInventoryItems, bool, bIsNewItem, int, itemIndex);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInventoryUpdated, const TArray<FItemData>&, InventoryItems);
-
 UCLASS(config=Game)
 class ASeniorProjectCharacter : public ACharacter
 {
@@ -68,13 +65,6 @@ public:
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
 	UWidgetComponent* PlayerNameTagComp;
 
-	//Delegates
-	UPROPERTY(BlueprintAssignable)
-	FItemPickedUp ItemPickedUp;
-
-	UPROPERTY(BlueprintAssignable)
-	FInventoryUpdated InventoryUpdated;
-
 protected:
 	float RespawnDuration;
 
@@ -110,25 +100,19 @@ protected:
 	void Die();
 
 	UFUNCTION(BlueprintCallable)
-	void UsePickup(TSubclassOf<AItem> ItemSubClass);
+	void UsePickup(AItem* Item);
 	
-	UFUNCTION(Server, Reliable, WithValidation)
-	void ServerUsePickup(TSubclassOf<AItem> ItemSubClass);
-	bool ServerUsePickup_Validate(TSubclassOf<AItem> ItemSubClass);
-	void ServerUsePickup_Implementation(TSubclassOf<AItem> ItemSubClass);
+	UFUNCTION(Server, Reliable)
+	void Server_UsePickup(AItem* Item);
 
 	UFUNCTION(NetMulticast, Reliable, WithValidation)
-	void MultiDie();
-	bool MultiDie_Validate();
-	void MultiDie_Implementation();
+	void Multicast_Die();
 
 	UFUNCTION(BlueprintCallable)
 	void Attack();
 
 	UFUNCTION(Server, Reliable, WithValidation)
-	void ServerAttack(AActor* Actor);
-	bool ServerAttack_Validate(AActor* Actor);
-	void ServerAttack_Implementation(AActor* Actor);
+	void Server_Attack(AActor* Actor);
 
 protected:
 	// APawn interface

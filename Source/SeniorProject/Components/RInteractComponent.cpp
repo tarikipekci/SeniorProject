@@ -63,17 +63,12 @@ void URInteractComponent::Interact()
 	{
 		if(AItem* Item = Cast<AItem>(InteractedActor))
 		{
-			ServerPickup(Item);
+			Server_Interact(Item);
 		}
 	}
 }
 
-bool URInteractComponent::ServerPickup_Validate(const AActor* Actor)
-{
-	return true;
-}
-
-void URInteractComponent::ServerPickup_Implementation(const AActor* Actor)
+void URInteractComponent::Server_Interact_Implementation(const AActor* Actor)
 {
 	if(Player->HasAuthority())
 	{

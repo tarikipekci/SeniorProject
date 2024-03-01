@@ -10,6 +10,7 @@
 
 class ASeniorProjectCharacter;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInventoryUpdated, const TArray<FItemData>&, InventoryItems);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class SENIORPROJECT_API URInventoryComponent : public UActorComponent
@@ -20,8 +21,12 @@ public:
 	// Sets default values for this component's properties
 	URInventoryComponent();
 
+	//Delegates
+	UPROPERTY(BlueprintAssignable)
+	FInventoryUpdated InventoryUpdated;
+
 protected:
-	UPROPERTY(ReplicatedUsing= OnRep_InventoryUpdated, BlueprintReadWrite, Category="Inventory")
+	UPROPERTY(ReplicatedUsing= OnRep_InventoryUpdated, BlueprintReadWrite, Category = "Inventory")
 	TArray<FItemData> InventoryItems;
 
 protected:
@@ -39,30 +44,21 @@ public:
 	void OnRep_InventoryUpdated();
 
 	UFUNCTION(BlueprintCallable)
-	void DecreaseItemAmount(FItemData ItemData, int SlotIndex);
+	void DecreaseItemAmount(int SlotIndex);
+
+	UFUNCTION(Server, Reliable)
+	void Server_DecreaseItemAmount(int SlotIndex);
 
 	UFUNCTION(BlueprintCallable)
-	void RemoveItem(int SlotIndex);
-	
-	UFUNCTION(BlueprintCallable)
-	const TArray<FItemData>& GetInventoryItems() const {return InventoryItems;}
-
-	UFUNCTION(BlueprintCallable)
-	void SetInventoryItems(TArray<FItemData> NewInventoryItems)
-	{
-		InventoryItems = NewInventoryItems;
-	}
+	const TArray<FItemData>& GetInventoryItems() const { return InventoryItems; }
 
 	UFUNCTION()
 	void InitializeInventory();
-	
+
 private:
 	UPROPERTY()
 	ASeniorProjectCharacter* Player;
 
-	UPROPERTY(Replicated)
-	bool bIsNewItem;
-
 	UPROPERTY()
-	int itemIndex;
+	int InventoryMaxSlotSize;
 };

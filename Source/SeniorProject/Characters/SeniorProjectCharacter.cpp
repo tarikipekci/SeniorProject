@@ -243,17 +243,17 @@ void ASeniorProjectCharacter::Attack()
 		ASeniorProjectCharacter* Player = Cast<ASeniorProjectCharacter>(Actor);
 		if(Player)
 		{
-			ServerAttack(Player);
+			Server_Attack(Player);
 		}
 	}
 }
 
-bool ASeniorProjectCharacter::ServerAttack_Validate(AActor* Actor)
+bool ASeniorProjectCharacter::Server_Attack_Validate(AActor* Actor)
 {
 	return true;
 }
 
-void ASeniorProjectCharacter::ServerAttack_Implementation(AActor* Actor)
+void ASeniorProjectCharacter::Server_Attack_Implementation(AActor* Actor)
 {
 	if(GetOwner()->GetLocalRole() == ROLE_Authority)
 	{
@@ -280,49 +280,47 @@ void ASeniorProjectCharacter::Die()
 	if(GetLocalRole() == ROLE_Authority)
 	{
 		//InventoryComp->DropAllInventoryItems();
-		MultiDie();
+		Multicast_Die();
 		//Start destroy timer to remove player actor from world
 		GetWorld()->GetTimerManager().SetTimer(DestroyHandle, this, &ASeniorProjectCharacter::CallDestroy,
 		                                       RespawnDuration, false);
 	}
 }
 
-bool ASeniorProjectCharacter::MultiDie_Validate()
+bool ASeniorProjectCharacter::Multicast_Die_Validate()
 {
 	return true;
 }
 
-void ASeniorProjectCharacter::MultiDie_Implementation()
+void ASeniorProjectCharacter::Multicast_Die_Implementation()
 {
 	this->GetCharacterMovement()->DisableMovement();
 	this->GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 	this->GetMesh()->SetAllBodiesSimulatePhysics(true);
 }
 
-void ASeniorProjectCharacter::UsePickup(TSubclassOf<AItem> ItemSubClass)
+void ASeniorProjectCharacter::UsePickup(AItem* Item)
 {
-	if(ItemSubClass)
+	if(Item)
 	{
-		if(AItem* Item = ItemSubClass.GetDefaultObject())
+		if(HasAuthority())
 		{
 			Item->Use(this);
 		}
-		ServerUsePickup(ItemSubClass);
+		else
+		{
+			Server_UsePickup(Item);
+		}
 	}
 }
 
-bool ASeniorProjectCharacter::ServerUsePickup_Validate(TSubclassOf<AItem> ItemSubClass)
+void ASeniorProjectCharacter::Server_UsePickup_Implementation(AItem* Item)
 {
-	return true;
-}
-
-void ASeniorProjectCharacter::ServerUsePickup_Implementation(TSubclassOf<AItem> ItemSubClass)
-{
-	for(FItemData Item : InventoryComp->GetInventoryItems())
+	for(FItemData ItemData : InventoryComp->GetInventoryItems())
 	{
-		if(Item.ItemClass == ItemSubClass)
+		if(ItemData.ItemActor == Item)
 		{
-			UsePickup(ItemSubClass);
+			UsePickup(Item);
 			return;
 		}
 	}

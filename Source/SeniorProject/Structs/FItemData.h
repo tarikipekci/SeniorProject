@@ -24,5 +24,8 @@ struct FItemData
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	bool bIsFull = false;
+
+	UPROPERTY(BlueprintReadWrite)
+	class AItem* ItemActor;
 };
 

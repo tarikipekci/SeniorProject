@@ -9,8 +9,9 @@
 #include "Item.generated.h"
 
 UENUM(BlueprintType)
-enum class EPickupItemType : uint8
+enum class EItemType : uint8
 {
+	None UMETA(DisplayName = "None"),
 	EDrinkable UMETA(DisplayName = "Drinkable"),
 	EEdible UMETA(DisplayName = "Edible"),
 	EHealth UMETA(DisplayName = "Health")
@@ -27,6 +28,10 @@ public:
 	// Sets default values for this actor's properties
 	AItem();
 
+public:
+	UPROPERTY(EditAnywhere, Category= "ItemInfo")
+	FItemData ItemData;
+
 protected:
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* MeshComp;
@@ -35,10 +40,8 @@ protected:
 	float ChangeAmount;
 
 	UPROPERTY(EditAnywhere, Category = "Enums")
-	EPickupItemType PickupType;
+	EItemType ItemType;
 	
-	UPROPERTY(EditDefaultsOnly)
-	FItemData ItemData;
 
 protected:
 	// Called when the game starts or when spawned
@@ -47,6 +50,14 @@ protected:
 public:
 	void InInventory(bool In);
 	virtual void Interact(ASeniorProjectCharacter* Player) override;
+
+	UFUNCTION(BlueprintCallable)
 	virtual void Use(ASeniorProjectCharacter* Player) override;
+
+	UFUNCTION(BlueprintCallable)
 	FItemData GetItemData() const {return ItemData;}
+
+	UFUNCTION(NetMulticast, Reliable)
+	void DestroyItem();
+	
 };

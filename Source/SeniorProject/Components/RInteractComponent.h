@@ -41,10 +41,8 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void Interact();
 
-	UFUNCTION(Server, Reliable, WithValidation)
-	void ServerPickup(const AActor* Actor);
-	bool ServerPickup_Validate(const AActor* Actor);
-	void ServerPickup_Implementation(const AActor* Actor);
+	UFUNCTION(Server, Reliable)
+	void Server_Interact(const AActor* Actor);
 
 public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
