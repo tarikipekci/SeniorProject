@@ -26,6 +26,6 @@ struct FItemData
 	bool bIsFull = false;
 
 	UPROPERTY(BlueprintReadWrite)
-	class AItem* ItemActor;
+	AItem* ItemActor;
 };
 

@@ -6,6 +6,7 @@
 #include "RInventoryComponent.h"
 #include "RLineTraceComponent.h"
 #include "Camera/CameraComponent.h"
+#include "SeniorProject/Building/InventoryBuilding.h"
 #include "SeniorProject/Environment/InteractableInterface.h"
 #include "SeniorProject/Environment/Item.h"
 
@@ -22,7 +23,7 @@ void URInteractComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	Player = Cast<ASeniorProjectCharacter>(GetOwner());
-	checkf(Player,TEXT(""));
+	checkf(Player, TEXT(""));
 }
 
 
@@ -34,7 +35,7 @@ void URInteractComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	PerformInteractCheck();
 }
 
-UInteractableInterface* URInteractComponent::PerformInteractCheck()
+bool URInteractComponent::PerformInteractCheck()
 {
 	FVector Start = Player->InteractComp->GetComponentLocation();
 	FVector End = Start + Player->GetFollowCamera()->GetForwardVector() * InteractRange;
@@ -47,24 +48,25 @@ UInteractableInterface* URInteractComponent::PerformInteractCheck()
 			InteractedActor = Actor;
 			if(AItem* Item = Cast<AItem>(InteractedActor))
 			{
-				InteractionFound.Broadcast(Item->GetItemData());
+				PickUpFound.Broadcast(Item);
+			}
+			else if(AInventoryBuilding* InventoryBuilding =Cast<AInventoryBuilding>(InteractedActor))
+			{
+				InventoryBuildingFound.Broadcast(InventoryBuilding);
 			}
 			bIsInteracting = true;
-			return Interface;
+			return bIsInteracting;
 		}
 	}
 	bIsInteracting = false;
-	return nullptr;
+	return bIsInteracting;
 }
 
 void URInteractComponent::Interact()
 {
 	if(InteractedActor && bIsInteracting)
 	{
-		if(AItem* Item = Cast<AItem>(InteractedActor))
-		{
-			Server_Interact(Item);
-		}
+		Server_Interact(InteractedActor);
 	}
 }
 
@@ -75,16 +77,30 @@ void URInteractComponent::Server_Interact_Implementation(const AActor* Actor)
 		FVector Start = Player->InteractComp->GetComponentLocation();
 		FVector End = Actor->GetActorLocation();
 		AActor* HitActor = Player->LineTraceComp->LineTraceSingle(Start, End, INTERACTABLE_CHANNEL, false);
-		if(Actor)
+		if(Actor && HitActor)
 		{
 			if(HitActor == Actor)
 			{
-				AItem* Item = Cast<AItem>(HitActor);
-				if(Item)
+				if(HitActor->GetClass()->IsChildOf(AItem::StaticClass()))
 				{
-					if(IInteractableInterface* Interface = Cast<IInteractableInterface>(Item))
+					AItem* Item = Cast<AItem>(HitActor);
+					if(Item)
 					{
-						Interface->Interact(Player);
+						if(IInteractableInterface* Interface = Cast<IInteractableInterface>(Item))
+						{
+							Interface->Interact(Player);
+						}
+					}
+				}
+				else if(HitActor->GetClass()->IsChildOf(AInventoryBuilding::StaticClass()))
+				{
+					AInventoryBuilding* InventoryBuilding = Cast<AInventoryBuilding>(HitActor);
+					if(InventoryBuilding)
+					{
+						if(IInteractableInterface* Interface = Cast<IInteractableInterface>(InventoryBuilding))
+						{
+							InventoryBuilding->Interact(Player);
+						}
 					}
 				}
 			}

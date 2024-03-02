@@ -55,6 +55,9 @@ public:
 	UFUNCTION()
 	void InitializeInventory();
 
+	UFUNCTION(BlueprintCallable)
+	void UseInventoryItem(int SlotIndex);
+
 private:
 	UPROPERTY()
 	ASeniorProjectCharacter* Player;

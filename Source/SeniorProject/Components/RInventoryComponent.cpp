@@ -156,6 +156,15 @@ void URInventoryComponent::InitializeInventory()
 	}
 }
 
+void URInventoryComponent::UseInventoryItem(int SlotIndex)
+{
+	if(Player)
+	{
+		Player->UsePickup(InventoryItems[SlotIndex].ItemActor);
+		DecreaseItemAmount(SlotIndex);
+	}
+}
+
 void URInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);

@@ -41,14 +41,12 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Enums")
 	EItemType ItemType;
-	
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:
-	void InInventory(bool In);
 	virtual void Interact(ASeniorProjectCharacter* Player) override;
 
 	UFUNCTION(BlueprintCallable)
@@ -59,5 +57,4 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void DestroyItem();
-	
 };

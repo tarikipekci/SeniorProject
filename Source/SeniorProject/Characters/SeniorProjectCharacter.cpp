@@ -192,7 +192,7 @@ void ASeniorProjectCharacter::Look(const FInputActionValue& Value)
 
 void ASeniorProjectCharacter::StartSprinting()
 {
-	if(PlayerStatComp->GetStamina() > 0)
+	if(PlayerStatComp->GetStamina() > 0 && GetVelocity().Size())
 	{
 		bIsSprinting = true;
 		PlayerStatComp->ControlSprintingTimer(true);
@@ -211,13 +211,17 @@ void ASeniorProjectCharacter::StopSprinting()
 
 void ASeniorProjectCharacter::HandleSprinting()
 {
-	if(bIsSprinting && this->GetVelocity().Size())
+	if(bIsSprinting && GetCharacterMovement()->IsFalling() == false)
 	{
 		PlayerStatComp->DecreaseStamina(PlayerStatComp->GetStaminaDecrementValue());
 		if(PlayerStatComp->GetStamina() <= 0)
 		{
 			StopSprinting();
 		}
+	}
+	if(this->GetVelocity().Size() <= 0)
+	{
+		StopSprinting();
 	}
 }
 
@@ -246,11 +250,6 @@ void ASeniorProjectCharacter::Attack()
 			Server_Attack(Player);
 		}
 	}
-}
-
-bool ASeniorProjectCharacter::Server_Attack_Validate(AActor* Actor)
-{
-	return true;
 }
 
 void ASeniorProjectCharacter::Server_Attack_Implementation(AActor* Actor)
@@ -285,11 +284,6 @@ void ASeniorProjectCharacter::Die()
 		GetWorld()->GetTimerManager().SetTimer(DestroyHandle, this, &ASeniorProjectCharacter::CallDestroy,
 		                                       RespawnDuration, false);
 	}
-}
-
-bool ASeniorProjectCharacter::Multicast_Die_Validate()
-{
-	return true;
 }
 
 void ASeniorProjectCharacter::Multicast_Die_Implementation()

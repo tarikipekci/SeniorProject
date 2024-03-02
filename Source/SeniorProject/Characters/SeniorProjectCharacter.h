@@ -98,20 +98,17 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void Die();
-
-	UFUNCTION(BlueprintCallable)
-	void UsePickup(AItem* Item);
 	
 	UFUNCTION(Server, Reliable)
 	void Server_UsePickup(AItem* Item);
 
-	UFUNCTION(NetMulticast, Reliable, WithValidation)
+	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_Die();
 
 	UFUNCTION(BlueprintCallable)
 	void Attack();
 
-	UFUNCTION(Server, Reliable, WithValidation)
+	UFUNCTION(Server, Reliable)
 	void Server_Attack(AActor* Actor);
 
 protected:
@@ -131,6 +128,9 @@ protected:
 public:
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator,
 	                         AActor* DamageCauser) override;
+
+	UFUNCTION(BlueprintCallable)
+	void UsePickup(AItem* Item);
 
 public:
 	/** Returns CameraBoom subobject **/

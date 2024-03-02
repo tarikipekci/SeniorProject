@@ -4,15 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
-#include "SeniorProject/Structs/FItemData.h"
 #include "RInteractComponent.generated.h"
 
+class AInventoryBuilding;
+class AItem;
 struct FItemData;
 class UInteractableInterface;
 class IInteractableInterface;
 class ASeniorProjectCharacter;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInteractionFound, FItemData, ItemData);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FPickUpFound, AItem*, Item);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInventoryBuildingFound, AInventoryBuilding*, InventoryBuilding);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class SENIORPROJECT_API URInteractComponent : public USceneComponent
@@ -24,7 +26,10 @@ public:
 	URInteractComponent();
 
 	UPROPERTY(BlueprintAssignable)
-	FInteractionFound InteractionFound;
+	FPickUpFound PickUpFound;
+
+	UPROPERTY(BlueprintAssignable)
+	FInventoryBuildingFound InventoryBuildingFound;
 
 	UFUNCTION(BlueprintCallable)
 	float GetInteractRange() const { return InteractRange; }
@@ -36,7 +41,7 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-	UInteractableInterface* PerformInteractCheck();
+	bool PerformInteractCheck();
 
 	UFUNCTION(BlueprintCallable)
 	void Interact();
