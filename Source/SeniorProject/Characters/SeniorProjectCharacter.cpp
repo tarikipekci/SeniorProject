@@ -11,11 +11,13 @@
 #include "EnhancedInputSubsystems.h"
 #include "TimerManager.h"
 #include "Engine/DamageEvents.h"
+#include "SeniorProject/Building/InventoryBuilding.h"
 #include "SeniorProject/Components/RInteractComponent.h"
 #include "SeniorProject/Components/RInventoryComponent.h"
 #include "SeniorProject/Components/RLineTraceComponent.h"
 #include "SeniorProject/Components/RPlayerStatComponent.h"
 #include "SeniorProject/Environment/Item.h"
+#include "SeniorProject/UI/RHUD.h"
 
 //////////////////////////////////////////////////////////////////////////
 // ASeniorProjectCharacter
@@ -308,6 +310,12 @@ void ASeniorProjectCharacter::UsePickup(AItem* Item)
 	}
 }
 
+void ASeniorProjectCharacter::Server_CloseInventoryBuilding_Implementation()
+{
+	AInventoryBuilding* LastInteractedInventoryBuilding = Cast<AInventoryBuilding>(InteractComp->GetInteractedActor());
+	LastInteractedInventoryBuilding->SetIsOpened(false);
+}
+
 void ASeniorProjectCharacter::Server_UsePickup_Implementation(AItem* Item)
 {
 	for(FItemData ItemData : InventoryComp->GetInventoryItems())
@@ -316,6 +324,52 @@ void ASeniorProjectCharacter::Server_UsePickup_Implementation(AItem* Item)
 		{
 			UsePickup(Item);
 			return;
+		}
+	}
+}
+
+void ASeniorProjectCharacter::Client_OpenInventory_Implementation()
+{
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	if(PlayerController)
+	{
+		AHUD* Hud = PlayerController->GetHUD();
+
+		if(Hud)
+		{
+			if(ARHUD* ARHud = Cast<ARHUD>(Hud))
+			{
+				if(ARHud)
+				{
+					ARHud->PlayerInventoryWidget->SetVisibility(ESlateVisibility::Visible);
+					ARHud->InteractableInventory->SetVisibility(ESlateVisibility::Visible);
+					ARHud->InteractionWidget->SetRenderOpacity(0);
+					PlayerController->SetIgnoreMoveInput(true);
+					PlayerController->SetIgnoreLookInput(true);
+					PlayerController->SetShowMouseCursor(true);
+				}
+			}
+		}
+	}
+}
+
+void ASeniorProjectCharacter::Client_CloseInventory_Implementation()
+{
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	if(PlayerController)
+	{
+		AHUD* Hud = PlayerController->GetHUD();
+
+		if(Hud)
+		{
+			if(ARHUD* ARHud = Cast<ARHUD>(Hud))
+			{
+				if(ARHud)
+				{
+					ARHud->InteractableInventory->SetVisibility(ESlateVisibility::Hidden);
+					Server_CloseInventoryBuilding();
+				}
+			}
 		}
 	}
 }

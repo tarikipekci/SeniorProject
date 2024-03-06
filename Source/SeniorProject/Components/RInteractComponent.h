@@ -37,6 +37,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool GetIsInteracting() const { return bIsInteracting; }
 
+	UFUNCTION(BlueprintCallable)
+	AActor* GetInteractedActor() const {return InteractedActor;}
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -47,7 +50,7 @@ protected:
 	void Interact();
 
 	UFUNCTION(Server, Reliable)
-	void Server_Interact(const AActor* Actor);
+	void Server_Interact(AActor* Actor);
 
 public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
@@ -61,6 +64,9 @@ private:
 
 	UPROPERTY()
 	bool bIsInteracting;
+
+	UPROPERTY()
+	AActor* DetectedInteractableActor;
 
 	UPROPERTY()
 	AActor* InteractedActor;

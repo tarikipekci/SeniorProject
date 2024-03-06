@@ -10,6 +10,7 @@
 #include "SeniorProjectCharacter.generated.h"
 
 
+class AInventoryBuilding;
 class URInventoryComponent;
 class URInteractComponent;
 class URLineTraceComponent;
@@ -47,9 +48,8 @@ class ASeniorProjectCharacter : public ACharacter
 
 public:
 	ASeniorProjectCharacter();
-
+	
 	//Player Components
-
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
 	URPlayerStatComponent* PlayerStatComp;
 
@@ -132,6 +132,15 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UsePickup(AItem* Item);
 
+	UFUNCTION(Client,Reliable)
+	void Client_OpenInventory();
+
+	UFUNCTION(Client,Reliable)
+	void Client_CloseInventory();
+
+	UFUNCTION(Server,Reliable)
+	void Server_CloseInventoryBuilding();
+	
 public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }

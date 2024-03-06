@@ -44,13 +44,14 @@ bool URInteractComponent::PerformInteractCheck()
 	{
 		if(Actor->GetClass()->ImplementsInterface(UInteractableInterface::StaticClass()))
 		{
-			UInteractableInterface* Interface = Cast<UInteractableInterface>(InteractedActor);
-			InteractedActor = Actor;
-			if(AItem* Item = Cast<AItem>(InteractedActor))
+			UInteractableInterface* Interface = Cast<UInteractableInterface>(DetectedInteractableActor);
+			DetectedInteractableActor = Actor;
+
+			if(AItem* Item = Cast<AItem>(DetectedInteractableActor))
 			{
 				PickUpFound.Broadcast(Item);
 			}
-			else if(AInventoryBuilding* InventoryBuilding =Cast<AInventoryBuilding>(InteractedActor))
+			else if(AInventoryBuilding* InventoryBuilding = Cast<AInventoryBuilding>(DetectedInteractableActor))
 			{
 				InventoryBuildingFound.Broadcast(InventoryBuilding);
 			}
@@ -64,13 +65,13 @@ bool URInteractComponent::PerformInteractCheck()
 
 void URInteractComponent::Interact()
 {
-	if(InteractedActor && bIsInteracting)
+	if(DetectedInteractableActor && bIsInteracting)
 	{
-		Server_Interact(InteractedActor);
+		Server_Interact(DetectedInteractableActor);
 	}
 }
 
-void URInteractComponent::Server_Interact_Implementation(const AActor* Actor)
+void URInteractComponent::Server_Interact_Implementation(AActor* Actor)
 {
 	if(Player->HasAuthority())
 	{
@@ -105,5 +106,6 @@ void URInteractComponent::Server_Interact_Implementation(const AActor* Actor)
 				}
 			}
 		}
+		InteractedActor = DetectedInteractableActor;
 	}
 }

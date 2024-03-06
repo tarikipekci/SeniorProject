@@ -6,6 +6,7 @@
 #include "InteractableBuilding.h"
 #include "InventoryBuilding.generated.h"
 
+class UHudWidget;
 /**
  * 
  */
@@ -21,4 +22,20 @@ public:
 protected:
 	UPROPERTY(BlueprintReadWrite, Replicated)
 	bool bOpened;
+
+public:
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
+	URInventoryComponent* InventoryComp;
+
+	UPROPERTY(EditAnywhere)
+	UStaticMeshComponent* MeshComp;
+
+	UFUNCTION(Server,Reliable)
+	void Server_OpenInventory(ASeniorProjectCharacter* Player);
+
+	UFUNCTION(Server,Reliable)
+	void Server_CloseInventory();
+
+	UFUNCTION(BlueprintCallable)
+	void SetIsOpened(bool bIsOpened) { bOpened = bIsOpened;}
 };
