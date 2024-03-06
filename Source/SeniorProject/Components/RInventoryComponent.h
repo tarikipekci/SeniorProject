@@ -37,8 +37,14 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool AddItem(FItemData ItemData);
 
+	UFUNCTION(Server,Reliable)
+	void Server_AddItem(FItemData ItemData);
+
 	UFUNCTION(BlueprintCallable)
 	void SwapItems(int index1, int index2);
+
+	UFUNCTION(Server,Reliable)
+	void Server_SwapItems(int index1, int index2);
 
 	UFUNCTION()
 	void OnRep_InventoryUpdated();

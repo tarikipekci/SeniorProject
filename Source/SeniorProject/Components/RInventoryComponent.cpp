@@ -23,54 +23,59 @@ void URInventoryComponent::BeginPlay()
 
 bool URInventoryComponent::AddItem(FItemData ItemData)
 {
-	if(!ItemData.ItemClass)
-	{
-		return false;
-	}
-
 	bool bAdded = false;
 	int EmptySlotIndex = -1;
-
-	for(int i = 0; i < InventoryItems.Num(); i++)
+	if(GetOwner()->HasAuthority())
 	{
-		FItemData& Item = InventoryItems[i];
-
-		if(!Item.ItemClass && EmptySlotIndex == -1)
+		if(!ItemData.ItemClass)
 		{
-			EmptySlotIndex = i;
+			return false;
 		}
 
-		if(Item.ItemClass == ItemData.ItemClass)
+		for(int i = 0; i < InventoryItems.Num(); i++)
 		{
-			int AvailableSize = Item.MaxStackSize - Item.CurrentStackCount;
-			int NeededSize = ItemData.CurrentStackCount;
+			FItemData& Item = InventoryItems[i];
 
-			if(AvailableSize <= 0)
+			if(!Item.ItemClass && EmptySlotIndex == -1)
 			{
-				continue;
+				EmptySlotIndex = i;
 			}
 
-			if(AvailableSize >= NeededSize)
+			if(Item.ItemClass == ItemData.ItemClass)
 			{
-				Item.CurrentStackCount += ItemData.CurrentStackCount;
-				bAdded = true;
-				break;
-			}
-			else
-			{
-				int RemainingCount = NeededSize - AvailableSize;
-				Item.CurrentStackCount = Item.MaxStackSize;
-				ItemData.CurrentStackCount = RemainingCount;
+				int AvailableSize = Item.MaxStackSize - Item.CurrentStackCount;
+				int NeededSize = ItemData.CurrentStackCount;
+
+				if(AvailableSize <= 0)
+				{
+					continue;
+				}
+
+				if(AvailableSize >= NeededSize)
+				{
+					Item.CurrentStackCount += ItemData.CurrentStackCount;
+					bAdded = true;
+					break;
+				}
+				else
+				{
+					int RemainingCount = NeededSize - AvailableSize;
+					Item.CurrentStackCount = Item.MaxStackSize;
+					ItemData.CurrentStackCount = RemainingCount;
+				}
 			}
 		}
-	}
 
-	if(!bAdded && EmptySlotIndex >= 0)
+		if(!bAdded && EmptySlotIndex >= 0)
+		{
+			InventoryItems[EmptySlotIndex] = ItemData;
+			bAdded = true;
+		}
+	}
+	else
 	{
-		InventoryItems[EmptySlotIndex] = ItemData;
-		bAdded = true;
+		Server_AddItem(ItemData);
 	}
-
 	if(bAdded)
 	{
 		OnRep_InventoryUpdated();
@@ -78,37 +83,54 @@ bool URInventoryComponent::AddItem(FItemData ItemData)
 	return bAdded;
 }
 
+void URInventoryComponent::Server_AddItem_Implementation(FItemData ItemData)
+{
+	AddItem(ItemData);
+}
+
 void URInventoryComponent::SwapItems(int index1, int index2)
 {
-	if(index1 >= 0 && index1 < InventoryMaxSlotSize && index2 >= 0 && index2 < InventoryMaxSlotSize)
+	if(GetOwner()->HasAuthority())
 	{
-		FItemData* Item1 = &InventoryItems[index1];
-		FItemData* Item2 = &InventoryItems[index2];
-
-		if(Item1->ItemClass == Item2->ItemClass)
+		if(index1 >= 0 && index1 < InventoryMaxSlotSize && index2 >= 0 && index2 < InventoryMaxSlotSize)
 		{
-			int AvailableSize = Item2->MaxStackSize - Item2->CurrentStackCount;
+			FItemData* Item1 = &InventoryItems[index1];
+			FItemData* Item2 = &InventoryItems[index2];
 
-			if(Item1->CurrentStackCount <= AvailableSize)
+			if(Item1->ItemClass == Item2->ItemClass)
 			{
-				Item2->CurrentStackCount += Item1->CurrentStackCount;
-				*Item1 = FItemData();
+				int AvailableSize = Item2->MaxStackSize - Item2->CurrentStackCount;
+
+				if(Item1->CurrentStackCount <= AvailableSize)
+				{
+					Item2->CurrentStackCount += Item1->CurrentStackCount;
+					*Item1 = FItemData();
+				}
+				else
+				{
+					int DraggedItemRemaining = Item1->CurrentStackCount - AvailableSize;
+					Item1->CurrentStackCount = DraggedItemRemaining;
+					Item2->CurrentStackCount += AvailableSize;
+				}
 			}
 			else
 			{
-				int DraggedItemRemaining = Item1->CurrentStackCount - AvailableSize;
-				Item1->CurrentStackCount = DraggedItemRemaining;
-				Item2->CurrentStackCount += AvailableSize;
+				FItemData TempItem = *Item1;
+				InventoryItems[index1] = *Item2;
+				InventoryItems[index2] = TempItem;
 			}
 		}
-		else
-		{
-			FItemData TempItem = *Item1;
-			InventoryItems[index1] = *Item2;
-			InventoryItems[index2] = TempItem;
-		}
-		OnRep_InventoryUpdated();
 	}
+	else
+	{
+		Server_SwapItems(index1, index2);
+	}
+	OnRep_InventoryUpdated();
+}
+
+void URInventoryComponent::Server_SwapItems_Implementation(int index1, int index2)
+{
+	SwapItems(index1, index2);
 }
 
 void URInventoryComponent::OnRep_InventoryUpdated()
