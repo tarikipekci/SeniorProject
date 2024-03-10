@@ -34,6 +34,7 @@ void AInventoryBuilding::Interact(ASeniorProjectCharacter* Player)
 		{
 			bOpened = true;
 			Server_OpenInventory(Player);
+			Player->Server_SetItemOwnership(this);
 		}
 	}
 }
@@ -43,8 +44,3 @@ void AInventoryBuilding::Server_OpenInventory_Implementation(ASeniorProjectChara
 	Player->Client_OpenInventory();
 }
 
-void AInventoryBuilding::Server_CloseInventory_Implementation()
-{
-	bOpened = false;
-	GEngine->AddOnScreenDebugMessage(-1,2,FColor::Red,"bopened set to false");
-}

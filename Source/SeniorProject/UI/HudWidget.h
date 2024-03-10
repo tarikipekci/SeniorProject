@@ -18,6 +18,9 @@ public:
 	UFUNCTION()
 	void SetHudWidgets(ARHUD* Hud);
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void UpdateInventoryBuilding();
+
 public:
 	UPROPERTY(BlueprintReadWrite ,meta=(BindWidget))
 	UUserWidget* WBP_PlayerInventory;

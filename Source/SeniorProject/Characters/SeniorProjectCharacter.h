@@ -137,10 +137,13 @@ public:
 
 	UFUNCTION(Client,Reliable)
 	void Client_CloseInventory();
-
+	
 	UFUNCTION(Server,Reliable)
 	void Server_CloseInventoryBuilding();
-	
+
+	UFUNCTION(Server, Reliable)
+	void Server_SetItemOwnership(AInventoryBuilding* SpawnedItem);
+
 public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }

@@ -32,10 +32,7 @@ public:
 
 	UFUNCTION(Server,Reliable)
 	void Server_OpenInventory(ASeniorProjectCharacter* Player);
-
-	UFUNCTION(Server,Reliable)
-	void Server_CloseInventory();
-
+	
 	UFUNCTION(BlueprintCallable)
 	void SetIsOpened(bool bIsOpened) { bOpened = bIsOpened;}
 };

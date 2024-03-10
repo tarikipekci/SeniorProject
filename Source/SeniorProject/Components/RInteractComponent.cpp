@@ -17,7 +17,6 @@ URInteractComponent::URInteractComponent()
 	InteractRange = 200.0f;
 }
 
-
 // Called when the game starts
 void URInteractComponent::BeginPlay()
 {
@@ -67,6 +66,7 @@ void URInteractComponent::Interact()
 {
 	if(DetectedInteractableActor && bIsInteracting)
 	{
+		InteractedActor = DetectedInteractableActor;
 		Server_Interact(DetectedInteractableActor);
 	}
 }
@@ -101,11 +101,11 @@ void URInteractComponent::Server_Interact_Implementation(AActor* Actor)
 						if(IInteractableInterface* Interface = Cast<IInteractableInterface>(InventoryBuilding))
 						{
 							InventoryBuilding->Interact(Player);
+							InteractedActor = DetectedInteractableActor;
 						}
 					}
 				}
 			}
 		}
-		InteractedActor = DetectedInteractableActor;
 	}
 }

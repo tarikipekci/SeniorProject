@@ -5,7 +5,9 @@
 
 #include "Net/UnrealNetwork.h"
 #include "../Environment/Item.h"
+#include "SeniorProject/Building/InventoryBuilding.h"
 
+class ARHUD;
 // Sets default values for this component's properties
 URInventoryComponent::URInventoryComponent()
 {
@@ -57,12 +59,10 @@ bool URInventoryComponent::AddItem(FItemData ItemData)
 					bAdded = true;
 					break;
 				}
-				else
-				{
-					int RemainingCount = NeededSize - AvailableSize;
-					Item.CurrentStackCount = Item.MaxStackSize;
-					ItemData.CurrentStackCount = RemainingCount;
-				}
+
+				int RemainingCount = NeededSize - AvailableSize;
+				Item.CurrentStackCount = Item.MaxStackSize;
+				ItemData.CurrentStackCount = RemainingCount;
 			}
 		}
 
@@ -88,14 +88,14 @@ void URInventoryComponent::Server_AddItem_Implementation(FItemData ItemData)
 	AddItem(ItemData);
 }
 
-void URInventoryComponent::SwapItems(int index1, int index2)
+void URInventoryComponent::SwapItems(URInventoryComponent* TargetInventory, int Index1, int Index2)
 {
 	if(GetOwner()->HasAuthority())
 	{
-		if(index1 >= 0 && index1 < InventoryMaxSlotSize && index2 >= 0 && index2 < InventoryMaxSlotSize)
+		if(Index1 >= 0 && Index1 < InventoryMaxSlotSize && Index2 >= 0 && Index2 < InventoryMaxSlotSize)
 		{
-			FItemData* Item1 = &InventoryItems[index1];
-			FItemData* Item2 = &InventoryItems[index2];
+			FItemData* Item1 = &InventoryItems[Index1];
+			FItemData* Item2 = &TargetInventory->InventoryItems[Index2];
 
 			if(Item1->ItemClass == Item2->ItemClass)
 			{
@@ -116,29 +116,27 @@ void URInventoryComponent::SwapItems(int index1, int index2)
 			else
 			{
 				FItemData TempItem = *Item1;
-				InventoryItems[index1] = *Item2;
-				InventoryItems[index2] = TempItem;
+				InventoryItems[Index1] = *Item2;
+				TargetInventory->InventoryItems[Index2] = TempItem;
 			}
 		}
+		OnRep_InventoryUpdated();
 	}
 	else
 	{
-		Server_SwapItems(index1, index2);
+		Server_SwapItems(TargetInventory, Index1, Index2);
 	}
-	OnRep_InventoryUpdated();
 }
 
-void URInventoryComponent::Server_SwapItems_Implementation(int index1, int index2)
+void URInventoryComponent::Server_SwapItems_Implementation(URInventoryComponent* TargetInventory, int Index1,
+                                                           int Index2)
 {
-	SwapItems(index1, index2);
+	SwapItems(TargetInventory, Index1, Index2);
 }
 
 void URInventoryComponent::OnRep_InventoryUpdated()
 {
-	if(Player)
-	{
-		InventoryUpdated.Broadcast(InventoryItems);
-	}
+	InventoryUpdated.Broadcast(InventoryItems);
 }
 
 void URInventoryComponent::DecreaseItemAmount(int SlotIndex)
@@ -192,5 +190,5 @@ void URInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	//Replicates to everyone
-	DOREPLIFETIME_CONDITION(URInventoryComponent, InventoryItems, COND_OwnerOnly);
+	DOREPLIFETIME(URInventoryComponent, InventoryItems);
 }

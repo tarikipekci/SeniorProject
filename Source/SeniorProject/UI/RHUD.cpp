@@ -32,7 +32,7 @@ void ARHUD::ToggleVisibilityOfInventory(APlayerController* PlayerController)
 			FInputModeGameOnly InputModeGameOnly;
 			PlayerController->SetInputMode(InputModeGameOnly);
 			PlayerController->SetShowMouseCursor(false);
-			PlayerInventoryWidget->SetVisibility(ESlateVisibility::Hidden);
+			PlayerInventoryWidget->SetVisibility(ESlateVisibility::Collapsed);
 			InteractionWidget->SetRenderOpacity(1);
 			PlayerController->SetIgnoreMoveInput(false);
 			PlayerController->SetIgnoreLookInput(false);

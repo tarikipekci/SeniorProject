@@ -17,6 +17,7 @@
 #include "SeniorProject/Components/RLineTraceComponent.h"
 #include "SeniorProject/Components/RPlayerStatComponent.h"
 #include "SeniorProject/Environment/Item.h"
+#include "SeniorProject/UI/HudWidget.h"
 #include "SeniorProject/UI/RHUD.h"
 
 //////////////////////////////////////////////////////////////////////////
@@ -310,10 +311,21 @@ void ASeniorProjectCharacter::UsePickup(AItem* Item)
 	}
 }
 
+void ASeniorProjectCharacter::Server_SetItemOwnership_Implementation(AInventoryBuilding* SpawnedItem)
+{
+	if (SpawnedItem && HasAuthority())
+    {
+        SpawnedItem->SetOwner(this);
+    }
+}
+
 void ASeniorProjectCharacter::Server_CloseInventoryBuilding_Implementation()
 {
 	AInventoryBuilding* LastInteractedInventoryBuilding = Cast<AInventoryBuilding>(InteractComp->GetInteractedActor());
-	LastInteractedInventoryBuilding->SetIsOpened(false);
+	if(LastInteractedInventoryBuilding)
+	{
+		LastInteractedInventoryBuilding->SetIsOpened(false);
+	}
 }
 
 void ASeniorProjectCharacter::Server_UsePickup_Implementation(AItem* Item)
@@ -341,6 +353,7 @@ void ASeniorProjectCharacter::Client_OpenInventory_Implementation()
 			{
 				if(ARHud)
 				{
+					ARHud->HudWidget->UpdateInventoryBuilding();
 					ARHud->PlayerInventoryWidget->SetVisibility(ESlateVisibility::Visible);
 					ARHud->InteractableInventory->SetVisibility(ESlateVisibility::Visible);
 					ARHud->InteractionWidget->SetRenderOpacity(0);
@@ -366,7 +379,7 @@ void ASeniorProjectCharacter::Client_CloseInventory_Implementation()
 			{
 				if(ARHud)
 				{
-					ARHud->InteractableInventory->SetVisibility(ESlateVisibility::Hidden);
+					ARHud->InteractableInventory->SetVisibility(ESlateVisibility::Collapsed);
 					Server_CloseInventoryBuilding();
 				}
 			}

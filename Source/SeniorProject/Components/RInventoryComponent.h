@@ -24,7 +24,7 @@ public:
 	//Delegates
 	UPROPERTY(BlueprintAssignable)
 	FInventoryUpdated InventoryUpdated;
-
+	
 protected:
 	UPROPERTY(ReplicatedUsing= OnRep_InventoryUpdated, BlueprintReadWrite, Category = "Inventory")
 	TArray<FItemData> InventoryItems;
@@ -37,16 +37,16 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool AddItem(FItemData ItemData);
 
-	UFUNCTION(Server,Reliable)
+	UFUNCTION(Server, Reliable)
 	void Server_AddItem(FItemData ItemData);
 
 	UFUNCTION(BlueprintCallable)
-	void SwapItems(int index1, int index2);
+	void SwapItems(URInventoryComponent* TargetInventory, int Index1, int Index2);
 
-	UFUNCTION(Server,Reliable)
-	void Server_SwapItems(int index1, int index2);
-
-	UFUNCTION()
+	UFUNCTION(Server, Reliable)
+	void Server_SwapItems(URInventoryComponent* TargetInventory, int Index1, int Index2);
+	
+	UFUNCTION(BlueprintCallable)
 	void OnRep_InventoryUpdated();
 
 	UFUNCTION(BlueprintCallable)
@@ -54,7 +54,7 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void Server_DecreaseItemAmount(int SlotIndex);
-
+	
 	UFUNCTION(BlueprintCallable)
 	const TArray<FItemData>& GetInventoryItems() const { return InventoryItems; }
 
