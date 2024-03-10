@@ -353,6 +353,8 @@ void ASeniorProjectCharacter::Client_OpenInventory_Implementation()
 			{
 				if(ARHud)
 				{
+					FInputModeGameAndUI InputModeGameAndUIOnly;
+					PlayerController->SetInputMode(InputModeGameAndUIOnly);
 					ARHud->HudWidget->UpdateInventoryBuilding();
 					ARHud->PlayerInventoryWidget->SetVisibility(ESlateVisibility::Visible);
 					ARHud->InteractableInventory->SetVisibility(ESlateVisibility::Visible);
@@ -379,7 +381,7 @@ void ASeniorProjectCharacter::Client_CloseInventory_Implementation()
 			{
 				if(ARHud)
 				{
-					ARHud->InteractableInventory->SetVisibility(ESlateVisibility::Collapsed);
+					ARHud->InteractableInventory->SetVisibility(ESlateVisibility::Hidden);
 					Server_CloseInventoryBuilding();
 				}
 			}
