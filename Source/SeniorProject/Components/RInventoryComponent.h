@@ -50,10 +50,10 @@ public:
 	void OnRep_InventoryUpdated();
 
 	UFUNCTION(BlueprintCallable)
-	void DecreaseItemAmount(int SlotIndex);
+	void DecreaseItemAmount(int SlotIndex, int Amount);
 
 	UFUNCTION(Server, Reliable)
-	void Server_DecreaseItemAmount(int SlotIndex);
+	void Server_DecreaseItemAmount(int SlotIndex, int Amount);
 	
 	UFUNCTION(BlueprintCallable)
 	const TArray<FItemData>& GetInventoryItems() const { return InventoryItems; }
@@ -64,10 +64,28 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UseInventoryItem(int SlotIndex);
 
+	UFUNCTION(BlueprintCallable)
+	void DropInventoryItem(int SlotIndex);
+
+	UFUNCTION(Server,Reliable)
+	void Server_DropInventoryItem(int SlotIndex);
+
+	UFUNCTION(NetMulticast,Reliable)
+	void NetMulticast_DropItem(int SlotIndex, AActor* Item, FVector Location);
+
+	UFUNCTION(NetMulticast,Reliable)
+	void NetMulticast_SpawnItem(int SlotIndex, AActor* Item, FVector Location);
+
 private:
 	UPROPERTY()
 	ASeniorProjectCharacter* Player;
 
 	UPROPERTY()
 	int InventoryMaxSlotSize;
+
+	UPROPERTY()
+	int DropRange;
+
+	UPROPERTY()
+	int DropDepth;
 };

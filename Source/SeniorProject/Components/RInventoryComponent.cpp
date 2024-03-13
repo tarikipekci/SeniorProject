@@ -3,6 +3,7 @@
 
 #include "RInventoryComponent.h"
 
+#include "RInteractComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "../Environment/Item.h"
 #include "SeniorProject/Building/InventoryBuilding.h"
@@ -12,6 +13,8 @@ class ARHUD;
 URInventoryComponent::URInventoryComponent()
 {
 	InventoryMaxSlotSize = 12;
+	DropRange = 100;
+	DropDepth = -200;
 }
 
 // Called when the game starts
@@ -139,13 +142,13 @@ void URInventoryComponent::OnRep_InventoryUpdated()
 	InventoryUpdated.Broadcast(InventoryItems);
 }
 
-void URInventoryComponent::DecreaseItemAmount(int SlotIndex)
+void URInventoryComponent::DecreaseItemAmount(int SlotIndex, int Amount)
 {
 	if(Player->HasAuthority())
 	{
 		if(InventoryItems[SlotIndex].ItemClass)
 		{
-			InventoryItems[SlotIndex].CurrentStackCount--;
+			InventoryItems[SlotIndex].CurrentStackCount -= Amount;
 			if(InventoryItems[SlotIndex].CurrentStackCount <= 0)
 			{
 				FItemData& CurrentItemData = InventoryItems[SlotIndex];
@@ -155,15 +158,15 @@ void URInventoryComponent::DecreaseItemAmount(int SlotIndex)
 	}
 	else
 	{
-		Server_DecreaseItemAmount(SlotIndex);
+		Server_DecreaseItemAmount(SlotIndex, Amount);
 	}
 
 	OnRep_InventoryUpdated();
 }
 
-void URInventoryComponent::Server_DecreaseItemAmount_Implementation(int SlotIndex)
+void URInventoryComponent::Server_DecreaseItemAmount_Implementation(int SlotIndex, int Amount)
 {
-	DecreaseItemAmount(SlotIndex);
+	DecreaseItemAmount(SlotIndex, Amount);
 }
 
 void URInventoryComponent::InitializeInventory()
@@ -181,7 +184,67 @@ void URInventoryComponent::UseInventoryItem(int SlotIndex)
 	if(Player)
 	{
 		Player->UsePickup(InventoryItems[SlotIndex].ItemActor);
-		DecreaseItemAmount(SlotIndex);
+		DecreaseItemAmount(SlotIndex, 1);
+	}
+}
+
+void URInventoryComponent::DropInventoryItem(int SlotIndex)
+{
+	if(GetOwner()->HasAuthority())
+	{
+		APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+
+		if(PlayerController)
+		{
+			FVector Start = Player->InteractComp->GetComponentLocation() + Player->GetActorForwardVector() * DropRange;
+			FVector End = Start + FVector(0, 0, DropDepth);
+			FHitResult HitResult;
+			FCollisionQueryParams CollisionQueryParams;
+
+			if(GetWorld()->LineTraceSingleByChannel(OUT HitResult, Start, End, ECC_GameTraceChannel1,
+			                                        CollisionQueryParams))
+			{
+				AActor* Actor = HitResult.GetActor();
+				AActor* Item = InventoryItems[SlotIndex].ItemActor;
+				if(Item)
+				{
+					NetMulticast_DropItem(SlotIndex, Item, HitResult.ImpactPoint);
+					DecreaseItemAmount(SlotIndex, InventoryItems[SlotIndex].CurrentStackCount);
+				}
+				else
+				{
+					NetMulticast_SpawnItem(SlotIndex, Item, HitResult.ImpactPoint);
+				}
+			}
+		}
+	}
+	else
+	{
+		Server_DropInventoryItem(SlotIndex);
+	}
+}
+
+void URInventoryComponent::NetMulticast_SpawnItem_Implementation(int SlotIndex, AActor* Item, FVector Location)
+{
+	AItem* DroppedItem = Cast<AItem>(Item);
+	AItem* SpawnedItem = GetWorld()->SpawnActor<AItem>(DroppedItem->ItemData.ItemClass, Location, FRotator(0, 0, 0));
+	SpawnedItem->ItemData = InventoryItems[SlotIndex];
+}
+
+void URInventoryComponent::Server_DropInventoryItem_Implementation(int SlotIndex)
+{
+	DropInventoryItem(SlotIndex);
+}
+
+void URInventoryComponent::NetMulticast_DropItem_Implementation(int SlotIndex, AActor* Item, FVector Location)
+{
+	AItem* DroppedItem = Cast<AItem>(Item);
+	if(DroppedItem && Item)
+	{
+		DroppedItem->ItemData = InventoryItems[SlotIndex];
+		Item->SetActorLocation(Location);
+		Item->SetActorHiddenInGame(false);
+		Item->SetActorEnableCollision(true);
 	}
 }
 
