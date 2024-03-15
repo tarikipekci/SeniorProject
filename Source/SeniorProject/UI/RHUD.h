@@ -3,9 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/Button.h"
 #include "GameFramework/HUD.h"
 #include "RHUD.generated.h"
 
+class UWidgetSwitcher;
+class UButton;
 /**
  * 
  */
@@ -34,6 +37,18 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	UUserWidget* InteractionWidget;
+
+	UPROPERTY(BlueprintReadWrite)
+	UUserWidget* CraftingMenu;
+
+	UPROPERTY(BlueprintReadWrite)
+	UWidgetSwitcher* TabPanel;
+	
+	UPROPERTY(BlueprintReadWrite)
+	UButton* InventoryButton;
+
+	UPROPERTY(BlueprintReadWrite)
+	UButton* CraftingButton;
 
 private:
 	UPROPERTY(EditAnywhere)

@@ -12,6 +12,7 @@
 #include "TimerManager.h"
 #include "Engine/DamageEvents.h"
 #include "SeniorProject/Building/InventoryBuilding.h"
+#include "SeniorProject/Components/RCraftComponent.h"
 #include "SeniorProject/Components/RInteractComponent.h"
 #include "SeniorProject/Components/RInventoryComponent.h"
 #include "SeniorProject/Components/RLineTraceComponent.h"
@@ -62,6 +63,7 @@ ASeniorProjectCharacter::ASeniorProjectCharacter()
 	LineTraceComp = CreateDefaultSubobject<URLineTraceComponent>("LineTraceComponent");
 	InteractComp = CreateDefaultSubobject<URInteractComponent>("InteractComponent");
 	InventoryComp = CreateDefaultSubobject<URInventoryComponent>("InventoryComponent");
+	CraftComp = CreateDefaultSubobject<URCraftComponent>("CraftComponent");
 	PlayerNameTagComp = CreateDefaultSubobject<UWidgetComponent>("PlayerNameTagComponent");
 	check(PlayerNameTagComp);
 	PlayerNameTagComp->SetWidgetSpace(EWidgetSpace::Screen);

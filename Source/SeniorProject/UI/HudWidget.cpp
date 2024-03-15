@@ -15,4 +15,8 @@ void UHudWidget::SetHudWidgets(ARHUD* Hud)
 	Hud->PlayerInventoryWidget = WBP_PlayerInventory;
 	Hud->InteractableInventory = WBP_InteractableInventory;
 	Hud->InteractionWidget = WBP_Interaction;
+	Hud->InventoryButton = InventoryButton;
+	Hud->CraftingButton = CraftingButton;
+	Hud->CraftingMenu = WBP_CraftingMenu;
+	Hud->TabPanel = WS_TabPanel;
 }

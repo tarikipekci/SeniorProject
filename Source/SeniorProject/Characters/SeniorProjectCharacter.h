@@ -10,6 +10,7 @@
 #include "SeniorProjectCharacter.generated.h"
 
 
+class URCraftComponent;
 class AInventoryBuilding;
 class URInventoryComponent;
 class URInteractComponent;
@@ -63,7 +64,11 @@ public:
 	URInventoryComponent* InventoryComp;
 
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
+	URCraftComponent* CraftComp;
+
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
 	UWidgetComponent* PlayerNameTagComp;
+
 
 protected:
 	float RespawnDuration;

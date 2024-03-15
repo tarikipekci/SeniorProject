@@ -6,6 +6,7 @@
 #include "HudWidget.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "Components/WidgetSwitcher.h"
 #include "SeniorProject/Characters/SeniorProjectCharacter.h"
 
 void ARHUD::CreateHudWidgets()
@@ -33,6 +34,9 @@ void ARHUD::ToggleVisibilityOfInventory(APlayerController* PlayerController)
 			PlayerController->SetInputMode(InputModeGameOnly);
 			PlayerController->SetShowMouseCursor(false);
 			PlayerInventoryWidget->SetVisibility(ESlateVisibility::Hidden);
+			InventoryButton->SetVisibility(ESlateVisibility::Hidden);
+			CraftingButton->SetVisibility(ESlateVisibility::Hidden);
+			CraftingMenu->SetVisibility(ESlateVisibility::Hidden);
 			InteractionWidget->SetRenderOpacity(1);
 			PlayerController->SetIgnoreMoveInput(false);
 			PlayerController->SetIgnoreLookInput(false);
@@ -45,6 +49,10 @@ void ARHUD::ToggleVisibilityOfInventory(APlayerController* PlayerController)
 			PlayerController->SetIgnoreLookInput(true);
 			PlayerController->SetShowMouseCursor(true);
 			PlayerInventoryWidget->SetVisibility(ESlateVisibility::Visible);
+			InventoryButton->SetVisibility(ESlateVisibility::Visible);
+			CraftingButton->SetVisibility(ESlateVisibility::Visible);
+			CraftingMenu->SetVisibility(ESlateVisibility::Visible);
+			TabPanel->SetActiveWidgetIndex(0);
 		}
 	}
 }
