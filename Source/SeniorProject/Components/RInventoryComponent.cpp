@@ -66,6 +66,8 @@ bool URInventoryComponent::AddItem(FItemData ItemData)
 				int RemainingCount = NeededSize - AvailableSize;
 				Item.CurrentStackCount = Item.MaxStackSize;
 				ItemData.CurrentStackCount = RemainingCount;
+				ItemData.ItemActor->ItemData.CurrentStackCount = RemainingCount;
+				OnRep_InventoryUpdated();
 			}
 		}
 
@@ -213,7 +215,10 @@ void URInventoryComponent::DropInventoryItem(int SlotIndex)
 				}
 				else
 				{
-					NetMulticast_SpawnItem(SlotIndex, Item, HitResult.ImpactPoint);
+					TSubclassOf<AItem> DroppedItemClass = InventoryItems[SlotIndex].ItemClass;
+					AItem* DroppedItem = DroppedItemClass.GetDefaultObject();
+					NetMulticast_SpawnItem(SlotIndex, DroppedItem, HitResult.ImpactPoint);
+					DecreaseItemAmount(SlotIndex, InventoryItems[SlotIndex].CurrentStackCount);
 				}
 			}
 		}
@@ -228,7 +233,7 @@ void URInventoryComponent::NetMulticast_SpawnItem_Implementation(int SlotIndex, 
 {
 	AItem* DroppedItem = Cast<AItem>(Item);
 	AItem* SpawnedItem = GetWorld()->SpawnActor<AItem>(DroppedItem->ItemData.ItemClass, Location, FRotator(0, 0, 0));
-	SpawnedItem->ItemData = InventoryItems[SlotIndex];
+	SpawnedItem->ItemData.CurrentStackCount = InventoryItems[SlotIndex].CurrentStackCount;
 }
 
 void URInventoryComponent::Server_DropInventoryItem_Implementation(int SlotIndex)

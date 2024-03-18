@@ -8,9 +8,9 @@ struct FRecipeOfItem
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TMap<TSubclassOf<AItem>,int> RequiredItems;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<AItem> CraftedItem;
 };

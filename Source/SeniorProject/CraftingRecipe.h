@@ -10,11 +10,12 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(BlueprintType)
 class SENIORPROJECT_API UCraftingRecipe : public UDataAsset
 {
 	GENERATED_BODY()
 	
-	UPROPERTY(EditAnywhere)
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FRecipeOfItem RecipeOfItem;
 };

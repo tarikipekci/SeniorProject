@@ -8,6 +8,7 @@
 #include "RInventoryComponent.generated.h"
 
 
+class URCraftComponent;
 class ASeniorProjectCharacter;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInventoryUpdated, const TArray<FItemData>&, InventoryItems);
@@ -16,11 +17,12 @@ UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class SENIORPROJECT_API URInventoryComponent : public UActorComponent
 {
 	GENERATED_BODY()
+	friend URCraftComponent;
 
 public:
 	// Sets default values for this component's properties
 	URInventoryComponent();
-
+	
 	//Delegates
 	UPROPERTY(BlueprintAssignable)
 	FInventoryUpdated InventoryUpdated;

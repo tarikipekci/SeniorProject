@@ -7,6 +7,11 @@
 #include "RCraftComponent.generated.h"
 
 
+struct FRecipeOfItem;
+struct FItemData;
+class URInventoryComponent;
+class ASeniorProjectCharacter;
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SENIORPROJECT_API URCraftComponent : public UActorComponent
 {
@@ -21,8 +26,17 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	UFUNCTION(BlueprintCallable)
+	int FindAmountOfRequiredItem(FItemData RequiredItemData);
 
-		
+	UFUNCTION(BlueprintCallable)
+	void CraftItem(FRecipeOfItem RecipeOfItem);
+
+private:
+	UPROPERTY()
+	ASeniorProjectCharacter* Player;
+
+protected:
+	UPROPERTY(BlueprintReadWrite)
+	URInventoryComponent* InventoryComp;
 };

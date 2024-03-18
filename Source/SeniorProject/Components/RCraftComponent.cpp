@@ -3,14 +3,14 @@
 
 #include "RCraftComponent.h"
 
+#include "RInventoryComponent.h"
+#include "SeniorProject/Characters/SeniorProjectCharacter.h"
+#include "SeniorProject/Environment/Item.h"
+#include "SeniorProject/Structs/FRecipeOfItem.h"
+
 // Sets default values for this component's properties
 URCraftComponent::URCraftComponent()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
 }
 
 
@@ -20,15 +20,58 @@ void URCraftComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
-	
+	Player = Cast<ASeniorProjectCharacter>(GetOwner());
+	if(Player)
+	{
+		InventoryComp = Player->InventoryComp;
+	}
 }
 
-
-// Called every frame
-void URCraftComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+int URCraftComponent::FindAmountOfRequiredItem(FItemData RequiredItemData)
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	int CurrentItemAmount = 0;
+	if(!RequiredItemData.ItemClass)
+	{
+		return 0;
+	}
 
-	// ...
+	for(auto ItemData : InventoryComp->GetInventoryItems())
+	{
+		if(ItemData.ItemClass == RequiredItemData.ItemClass)
+		{
+			CurrentItemAmount += ItemData.CurrentStackCount;
+		}
+	}
+	return CurrentItemAmount;
 }
 
+void URCraftComponent::CraftItem(FRecipeOfItem RecipeOfItem)
+{
+	for(auto RequiredItem : RecipeOfItem.RequiredItems)
+	{
+		TSubclassOf<AItem> CurrentItemClass = RequiredItem.Key;
+		AItem* CurrentItem = CurrentItemClass.GetDefaultObject();
+		FItemData CurrentItemData = CurrentItem->ItemData;
+		int RequiredAmount = RequiredItem.Value;
+		for(FItemData& ItemData : InventoryComp->InventoryItems)
+		{
+			if(ItemData.ItemClass == CurrentItemData.ItemClass)
+			{
+				if(RequiredAmount <= ItemData.CurrentStackCount)
+				{
+					ItemData.CurrentStackCount -= RequiredAmount;
+
+					if(ItemData.CurrentStackCount <= 0)
+					{
+						ItemData = FItemData();
+					}
+					break;
+				}
+				RequiredAmount -= ItemData.CurrentStackCount;
+				ItemData = FItemData();
+			}
+		}
+	}
+	FItemData CraftedItem = RecipeOfItem.CraftedItem.GetDefaultObject()->ItemData;
+	InventoryComp->AddItem(CraftedItem);
+}
