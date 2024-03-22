@@ -7,6 +7,7 @@
 #include "RCraftComponent.generated.h"
 
 
+class AItem;
 struct FRecipeOfItem;
 struct FItemData;
 class URInventoryComponent;
@@ -31,6 +32,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void CraftItem(FRecipeOfItem RecipeOfItem);
+
+	UFUNCTION(BlueprintCallable)
+	AItem* GetDefaultsOfClass(TSubclassOf<AItem> ItemClass) {return ItemClass.GetDefaultObject(); }
 
 private:
 	UPROPERTY()

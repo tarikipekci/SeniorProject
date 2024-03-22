@@ -22,7 +22,7 @@ URPlayerStatComponent::URPlayerStatComponent()
 	DefaultThirst = 0.0f;
 	MaxThirst = 100.0f;
 	Thirst = DefaultThirst;
-	ThirstDecrementValue = 0.5f;
+	ThirstDecrementValue = 0.6f;
 
 	//Stamina
 	MaxStamina = 100.0f;
@@ -84,14 +84,20 @@ void URPlayerStatComponent::IncreaseHunger(float Value)
 	{
 		Hunger += Value;
 
-		if(Hunger > MaxHunger)
+		if(Hunger >= MaxHunger)
 		{
 			if(ASeniorProjectCharacter* Character = Cast<ASeniorProjectCharacter>(GetOwner()))
 			{
 				Character->TakeDamage(Hunger * DamageMultiplier, FDamageEvent(), Character->GetController(), Character);
+				Hunger = MaxHunger;
 			}
 		}
 	}
+}
+
+void URPlayerStatComponent::ServerDecreaseHunger_Implementation(float Value)
+{
+	DecreaseHunger(Value);
 }
 
 void URPlayerStatComponent::IncreaseThirst(float Value)
@@ -104,14 +110,20 @@ void URPlayerStatComponent::IncreaseThirst(float Value)
 	{
 		Thirst += Value;
 
-		if(Thirst > MaxThirst)
+		if(Thirst >= MaxThirst)
 		{
 			if(ASeniorProjectCharacter* Character = Cast<ASeniorProjectCharacter>(GetOwner()))
 			{
 				Character->TakeDamage(Thirst * DamageMultiplier, FDamageEvent(), Character->GetController(), Character);
+				Thirst = MaxThirst;
 			}
 		}
 	}
+}
+
+void URPlayerStatComponent::ServerDecreaseThirst_Implementation(float Value)
+{
+	DecreaseThirst(Value);
 }
 
 void URPlayerStatComponent::DecreaseStamina(float Value)
@@ -135,7 +147,7 @@ void URPlayerStatComponent::DecreaseStamina(float Value)
 
 void URPlayerStatComponent::DecreaseHunger(float Value)
 {
-	if(GetOwnerRole() == ROLE_Authority)
+	if(GetOwner()->HasAuthority())
 	{
 		if(Hunger - Value <= 0)
 		{
@@ -143,18 +155,18 @@ void URPlayerStatComponent::DecreaseHunger(float Value)
 		}
 		else
 		{
-			if(Hunger >= MaxHunger)
-			{
-				Hunger = MaxHunger;
-				Hunger -= Value;
-			}
+			Hunger -= Value;
 		}
+	}
+	else
+	{
+		ServerDecreaseHunger(Value);
 	}
 }
 
 void URPlayerStatComponent::DecreaseThirst(float Value)
 {
-	if(GetOwnerRole() == ROLE_Authority)
+	if(GetOwner()->HasAuthority())
 	{
 		if(Thirst - Value <= 0)
 		{
@@ -162,12 +174,12 @@ void URPlayerStatComponent::DecreaseThirst(float Value)
 		}
 		else
 		{
-			if(Thirst >= MaxThirst)
-			{
-				Thirst = MaxThirst;
-				Thirst -= Value;
-			}
+			Thirst -= Value;
 		}
+	}
+	else
+	{
+		ServerDecreaseThirst(Value);
 	}
 }
 

@@ -12,9 +12,11 @@ UENUM(BlueprintType)
 enum class EItemType : uint8
 {
 	None UMETA(DisplayName = "None"),
-	EDrinkable UMETA(DisplayName = "Drinkable"),
-	EEdible UMETA(DisplayName = "Edible"),
-	EHealth UMETA(DisplayName = "Health")
+	Material UMETA(DisplayerName = "Material"),
+	Tool UMETA(DisplayName = "Tool"),
+	Drinkable UMETA(DisplayName = "Drinkable"),
+	Edible UMETA(DisplayName = "Edible"),
+	Health UMETA(DisplayName = "Health")
 };
 
 class ASeniorProjectCharacter;
@@ -32,15 +34,19 @@ public:
 	UPROPERTY(EditAnywhere, Category= "ItemInfo")
 	FItemData ItemData;
 
+	UPROPERTY(BlueprintReadWrite, Replicated)
+	bool bIsInteractable;
+
 protected:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* MeshComp;
 	
 	UPROPERTY(EditAnywhere)
 	float ChangeAmount;
 
-	UPROPERTY(EditAnywhere, Category = "Enums")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enums")
 	EItemType ItemType;
+
 
 protected:
 	// Called when the game starts or when spawned

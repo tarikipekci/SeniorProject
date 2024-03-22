@@ -48,7 +48,10 @@ bool URInteractComponent::PerformInteractCheck()
 
 			if(AItem* Item = Cast<AItem>(DetectedInteractableActor))
 			{
-				PickUpFound.Broadcast(Item);
+				if(Item->bIsInteractable)
+				{
+					PickUpFound.Broadcast(Item);
+				}
 			}
 			else if(AInventoryBuilding* InventoryBuilding = Cast<AInventoryBuilding>(DetectedInteractableActor))
 			{
@@ -64,10 +67,18 @@ bool URInteractComponent::PerformInteractCheck()
 
 void URInteractComponent::Interact()
 {
-	if(DetectedInteractableActor && bIsInteracting)
+	if(DetectedInteractableActor && bIsInteracting && DetectedInteractableActor)
 	{
-		InteractedActor = DetectedInteractableActor;
-		Server_Interact(DetectedInteractableActor);
+		AItem* InteractableItem = Cast<AItem>(DetectedInteractableActor);
+		if(InteractableItem)
+		{
+			if(!InteractableItem->bIsInteractable)
+			{
+				return;
+			}
+		}
+			InteractedActor = DetectedInteractableActor;
+			Server_Interact(DetectedInteractableActor);
 	}
 }
 

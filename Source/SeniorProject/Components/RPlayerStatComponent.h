@@ -83,9 +83,17 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void ServerIncreaseHunger(float Value);
 
+	//Server function of DecreaseHunger
+	UFUNCTION(Server,Reliable)
+	void ServerDecreaseHunger(float Value);
+
 	//Server function of IncreaseThirst
 	UFUNCTION(Server, Reliable)
 	void ServerIncreaseThirst(float Value);
+
+	//Server function of DecreaseThirst;
+	UFUNCTION(Server,Reliable)
+	void ServerDecreaseThirst(float Value);
 
 	//Server function of DecreaseStamina
 	UFUNCTION(Server, Reliable)

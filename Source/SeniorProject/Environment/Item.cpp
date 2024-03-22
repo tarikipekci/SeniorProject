@@ -4,6 +4,7 @@
 #include "Item.h"
 
 #include "Components/StaticMeshComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "SeniorProject/Characters/SeniorProjectCharacter.h"
 #include "SeniorProject/Components/RInventoryComponent.h"
 #include "SeniorProject/Components/RPlayerStatComponent.h"
@@ -15,6 +16,7 @@ AItem::AItem()
 	RootComponent = MeshComp;
 	bReplicates = true;
 	SetReplicatingMovement(true);
+	bIsInteractable = true;
 }
 
 // Called when the game starts or when spawned
@@ -39,15 +41,15 @@ void AItem::Use(ASeniorProjectCharacter* Player)
 {
 	IInteractableInterface::Use(Player);
 
-	if(ItemType == EItemType::EEdible)
+	if(ItemType == EItemType::Edible)
 	{
 		Player->PlayerStatComp->DecreaseHunger(ChangeAmount);
 	}
-	else if(ItemType == EItemType::EDrinkable)
+	else if(ItemType == EItemType::Drinkable)
 	{
 		Player->PlayerStatComp->DecreaseThirst(ChangeAmount);
 	}
-	else if(ItemType == EItemType::EHealth)
+	else if(ItemType == EItemType::Health)
 	{
 		Player->PlayerStatComp->IncreaseHealth(ChangeAmount);
 	}
@@ -57,4 +59,12 @@ void AItem::DestroyItem_Implementation()
 {
 	SetActorHiddenInGame(true);
 	SetActorEnableCollision(false);
+}
+
+void AItem::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	//Replicates to everyone
+	DOREPLIFETIME(AItem,bIsInteractable);
 }
