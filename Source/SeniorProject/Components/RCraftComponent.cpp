@@ -18,8 +18,7 @@ URCraftComponent::URCraftComponent()
 void URCraftComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// ...
+	
 	Player = Cast<ASeniorProjectCharacter>(GetOwner());
 	if(Player)
 	{
@@ -45,33 +44,50 @@ int URCraftComponent::FindAmountOfRequiredItem(FItemData RequiredItemData)
 	return CurrentItemAmount;
 }
 
-void URCraftComponent::CraftItem(FRecipeOfItem RecipeOfItem)
+void URCraftComponent::CraftItem(const FRecipeOfItem& RecipeOfItem)
 {
-	for(auto RequiredItem : RecipeOfItem.RequiredItems)
+	if(GetOwner()->HasAuthority())
 	{
-		TSubclassOf<AItem> CurrentItemClass = RequiredItem.Key;
-		AItem* CurrentItem = CurrentItemClass.GetDefaultObject();
-		FItemData CurrentItemData = CurrentItem->ItemData;
-		int RequiredAmount = RequiredItem.Value;
-		for(FItemData& ItemData : InventoryComp->InventoryItems)
+		for(int i = 0; i < RecipeOfItem.RequiredItem.Num(); ++i)
 		{
-			if(ItemData.ItemClass == CurrentItemData.ItemClass)
+			TSubclassOf<AItem> CurrentItemClass = RecipeOfItem.RequiredItem[i];
+			AItem* CurrentItem = CurrentItemClass.GetDefaultObject();
+			FItemData CurrentItemData = CurrentItem->ItemData;
+			int RequiredAmount = RecipeOfItem.RequiredAmount[i];
+			for(FItemData& ItemData : InventoryComp->InventoryItems)
 			{
-				if(RequiredAmount <= ItemData.CurrentStackCount)
+				if(ItemData.ItemClass == CurrentItemData.ItemClass)
 				{
-					ItemData.CurrentStackCount -= RequiredAmount;
-
-					if(ItemData.CurrentStackCount <= 0)
+					if(RequiredAmount <= ItemData.CurrentStackCount)
 					{
-						ItemData = FItemData();
+						ItemData.CurrentStackCount -= RequiredAmount;
+
+						if(ItemData.CurrentStackCount <= 0)
+						{
+							ItemData = FItemData();
+						}
+						break;
 					}
-					break;
+					RequiredAmount -= ItemData.CurrentStackCount;
+					ItemData = FItemData();
 				}
-				RequiredAmount -= ItemData.CurrentStackCount;
-				ItemData = FItemData();
 			}
 		}
+
+		FItemData CraftedItemData = RecipeOfItem.CraftedItem.GetDefaultObject()->ItemData;
+		TSubclassOf<AItem> CraftedItemClass = CraftedItemData.ItemClass;
+		AItem* SpawnedItem = GetWorld()->SpawnActor<AItem>(CraftedItemClass, FVector::ZeroVector, FRotator(0, 0, 0));
+		InventoryComp->AddItem(SpawnedItem->ItemData);
+		//SpawnedItem->SetActorHiddenInGame(true);
+		SpawnedItem->SetActorEnableCollision(false);
 	}
-	FItemData CraftedItem = RecipeOfItem.CraftedItem.GetDefaultObject()->ItemData;
-	InventoryComp->AddItem(CraftedItem);
+	else
+	{
+		Server_CraftItem(RecipeOfItem);
+	}
+}
+
+void URCraftComponent::Server_CraftItem_Implementation(const FRecipeOfItem& RecipeOfItem)
+{
+	CraftItem(RecipeOfItem);
 }

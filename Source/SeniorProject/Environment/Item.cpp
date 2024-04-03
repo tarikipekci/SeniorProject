@@ -3,6 +3,7 @@
 
 #include "Item.h"
 
+#include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "SeniorProject/Characters/SeniorProjectCharacter.h"
@@ -13,17 +14,20 @@
 AItem::AItem()
 {
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>("StaticMeshComponent");
+	InteractCollision = CreateDefaultSubobject<UCapsuleComponent>("InteractCollision");
 	RootComponent = MeshComp;
 	bReplicates = true;
 	SetReplicatingMovement(true);
 	bIsInteractable = true;
+	ItemData.ItemActor = this;
 }
 
 // Called when the game starts or when spawned
 void AItem::BeginPlay()
 {
 	Super::BeginPlay();
-	ItemData.ItemActor = this;
+	InteractCollision->SetCollisionProfileName("InteractCollision");
+	bIsEquipped = false;
 }
 
 void AItem::Interact(ASeniorProjectCharacter* Player)
@@ -53,12 +57,17 @@ void AItem::Use(ASeniorProjectCharacter* Player)
 	{
 		Player->PlayerStatComp->IncreaseHealth(ChangeAmount);
 	}
+	else if(ItemType == EItemType::Tool)
+	{
+		Player->EquipItem(this);
+	}
 }
 
 void AItem::DestroyItem_Implementation()
 {
 	SetActorHiddenInGame(true);
 	SetActorEnableCollision(false);
+	MeshComp->SetSimulatePhysics(false);
 }
 
 void AItem::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -67,4 +76,5 @@ void AItem::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimePro
 
 	//Replicates to everyone
 	DOREPLIFETIME(AItem,bIsInteractable);
+	DOREPLIFETIME(AItem,bIsEquipped);
 }

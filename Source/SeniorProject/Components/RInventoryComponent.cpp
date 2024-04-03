@@ -183,18 +183,30 @@ void URInventoryComponent::InitializeInventory()
 
 void URInventoryComponent::UseInventoryItem(int SlotIndex)
 {
-	if(Player)
+	if(Player->HasAuthority())
 	{
 		Player->UsePickup(InventoryItems[SlotIndex].ItemActor);
-		DecreaseItemAmount(SlotIndex, 1);
+		if(InventoryItems[SlotIndex].ItemActor->ItemType != EItemType::Tool)
+		{
+			DecreaseItemAmount(SlotIndex, 1);
+		}
 	}
+	else
+	{
+		Server_UseInventoryItem(SlotIndex);
+	}
+}
+
+void URInventoryComponent::Server_UseInventoryItem_Implementation(int SlotIndex)
+{
+	UseInventoryItem(SlotIndex);
 }
 
 void URInventoryComponent::DropInventoryItem(int SlotIndex)
 {
 	if(GetOwner()->HasAuthority())
 	{
-		APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+		APlayerController* PlayerController = Cast<APlayerController>(Player->GetController());
 
 		if(PlayerController)
 		{
@@ -206,18 +218,14 @@ void URInventoryComponent::DropInventoryItem(int SlotIndex)
 			if(GetWorld()->LineTraceSingleByChannel(OUT HitResult, Start, End, ECC_GameTraceChannel1,
 			                                        CollisionQueryParams))
 			{
-				AActor* Actor = HitResult.GetActor();
-				AActor* Item = InventoryItems[SlotIndex].ItemActor;
-				if(Item)
+				if(InventoryItems[SlotIndex].ItemActor)
 				{
-					NetMulticast_DropItem(SlotIndex, Item, HitResult.ImpactPoint);
-					DecreaseItemAmount(SlotIndex, InventoryItems[SlotIndex].CurrentStackCount);
-				}
-				else
-				{
-					TSubclassOf<AItem> DroppedItemClass = InventoryItems[SlotIndex].ItemClass;
-					AItem* DroppedItem = DroppedItemClass.GetDefaultObject();
-					NetMulticast_SpawnItem(SlotIndex, DroppedItem, HitResult.ImpactPoint);
+					if(InventoryItems[SlotIndex].ItemActor == EquippedItem)
+					{
+						EquippedItem->SetActorHiddenInGame(false);
+						Player->UnEquipItem(EquippedItem);
+					}
+					NetMulticast_DropItem(SlotIndex, InventoryItems[SlotIndex].ItemActor, HitResult.ImpactPoint);
 					DecreaseItemAmount(SlotIndex, InventoryItems[SlotIndex].CurrentStackCount);
 				}
 			}
@@ -229,11 +237,9 @@ void URInventoryComponent::DropInventoryItem(int SlotIndex)
 	}
 }
 
-void URInventoryComponent::NetMulticast_SpawnItem_Implementation(int SlotIndex, AActor* Item, FVector Location)
+void URInventoryComponent::OnRep_ItemEquipped()
 {
-	AItem* DroppedItem = Cast<AItem>(Item);
-	AItem* SpawnedItem = GetWorld()->SpawnActor<AItem>(DroppedItem->ItemData.ItemClass, Location, FRotator(0, 0, 0));
-	SpawnedItem->ItemData.CurrentStackCount = InventoryItems[SlotIndex].CurrentStackCount;
+	Player->ItemEquipped.Broadcast(EquippedItem);
 }
 
 void URInventoryComponent::Server_DropInventoryItem_Implementation(int SlotIndex)
@@ -241,12 +247,11 @@ void URInventoryComponent::Server_DropInventoryItem_Implementation(int SlotIndex
 	DropInventoryItem(SlotIndex);
 }
 
-void URInventoryComponent::NetMulticast_DropItem_Implementation(int SlotIndex, AActor* Item, FVector Location)
+void URInventoryComponent::NetMulticast_DropItem_Implementation(int SlotIndex, AItem* Item, FVector Location)
 {
-	AItem* DroppedItem = Cast<AItem>(Item);
-	if(DroppedItem && Item)
+	if(Item)
 	{
-		DroppedItem->ItemData = InventoryItems[SlotIndex];
+		Item->ItemData.CurrentStackCount = InventoryItems[SlotIndex].CurrentStackCount;
 		Item->SetActorLocation(Location);
 		Item->SetActorHiddenInGame(false);
 		Item->SetActorEnableCollision(true);
@@ -259,4 +264,5 @@ void URInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 
 	//Replicates to everyone
 	DOREPLIFETIME(URInventoryComponent, InventoryItems);
+	DOREPLIFETIME(URInventoryComponent, EquippedItem);
 }

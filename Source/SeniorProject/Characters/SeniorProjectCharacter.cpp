@@ -11,6 +11,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "TimerManager.h"
 #include "Engine/DamageEvents.h"
+#include "Engine/SkeletalMeshSocket.h"
 #include "SeniorProject/Building/InventoryBuilding.h"
 #include "SeniorProject/Components/RCraftComponent.h"
 #include "SeniorProject/Components/RInteractComponent.h"
@@ -125,7 +126,6 @@ float ASeniorProjectCharacter::TakeDamage(float DamageAmount, FDamageEvent const
 
 	return ActualDamage;
 }
-
 
 //////////////////////////////////////////////////////////////////////////
 // Input
@@ -242,6 +242,59 @@ void ASeniorProjectCharacter::AttemptJump()
 	}
 }
 
+void ASeniorProjectCharacter::EquipItem(AItem* EquippedItem)
+{
+	if(HasAuthority())
+	{
+		EquippedItem->SetActorHiddenInGame(false);
+		//EquippedItem->SetActorEnableCollision(true);
+		InventoryComp->SetEquippedItem(EquippedItem);
+		EquippedItem->bIsInteractable = false;
+		APlayerController* PlayerController = Cast<APlayerController>(this->GetController());
+		APawn* PlayerPawn = PlayerController->GetPawn();
+		USkeletalMeshComponent* SkeletalMesh = PlayerPawn->FindComponentByClass<USkeletalMeshComponent>();
+		FName SocketName = TEXT("ToolSocket");
+		SetCollisionResponseToChannelOfEquippedItem(EquippedItem);
+		SkeletalMesh->GetSocketByName(SocketName)->AttachActor(EquippedItem, SkeletalMesh);
+		const USkeletalMeshSocket* ToolSocket = SkeletalMesh->GetSocketByName(SocketName);
+	}
+	else
+	{
+		EquippedItem->SetActorHiddenInGame(false);
+		//EquippedItem->SetActorEnableCollision(true);
+		Server_EquipItem(EquippedItem);
+	}
+}
+
+void ASeniorProjectCharacter::Server_EquipItem_Implementation(AItem* EquippedItem)
+{
+	EquipItem(EquippedItem);
+}
+
+void ASeniorProjectCharacter::UnEquipItem(AItem* UnequippedItem)
+{
+	if(HasAuthority())
+	{
+		APlayerController* PlayerController = Cast<APlayerController>(this->GetController());
+		APawn* PlayerPawn = PlayerController->GetPawn();
+		USkeletalMeshComponent* SkeletalMesh = PlayerPawn->FindComponentByClass<USkeletalMeshComponent>();
+		FName SocketName = TEXT("ToolSocket");
+		const USkeletalMeshSocket* ToolSocket = SkeletalMesh->GetSocketByName(SocketName);
+		UnequippedItem->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+		UnequippedItem->bIsInteractable = true;
+		InventoryComp->SetEquippedItem(nullptr);
+	}
+	else
+	{
+		Server_UnEquipItem(UnequippedItem);
+	}
+}
+
+void ASeniorProjectCharacter::Server_UnEquipItem_Implementation(AItem* UnequippedItem)
+{
+	UnEquipItem(UnequippedItem);
+}
+
 void ASeniorProjectCharacter::Attack()
 {
 	FVector Start = InteractComp->GetComponentLocation();
@@ -315,10 +368,10 @@ void ASeniorProjectCharacter::UsePickup(AItem* Item)
 
 void ASeniorProjectCharacter::Server_SetItemOwnership_Implementation(AInventoryBuilding* SpawnedItem)
 {
-	if (SpawnedItem && HasAuthority())
-    {
-        SpawnedItem->SetOwner(this);
-    }
+	if(SpawnedItem && HasAuthority())
+	{
+		SpawnedItem->SetOwner(this);
+	}
 }
 
 void ASeniorProjectCharacter::Server_CloseInventoryBuilding_Implementation()

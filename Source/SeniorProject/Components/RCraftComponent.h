@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "SeniorProject/Structs/FRecipeOfItem.h"
 #include "RCraftComponent.generated.h"
 
 
@@ -29,16 +30,22 @@ protected:
 public:	
 	UFUNCTION(BlueprintCallable)
 	int FindAmountOfRequiredItem(FItemData RequiredItemData);
-
+	
 	UFUNCTION(BlueprintCallable)
-	void CraftItem(FRecipeOfItem RecipeOfItem);
+	void CraftItem(UPARAM(ref) const FRecipeOfItem& RecipeOfItem);
 
 	UFUNCTION(BlueprintCallable)
 	AItem* GetDefaultsOfClass(TSubclassOf<AItem> ItemClass) {return ItemClass.GetDefaultObject(); }
+	
+	UFUNCTION(Server, Reliable)
+	void Server_CraftItem(const FRecipeOfItem& RecipeOfItem);
 
 private:
 	UPROPERTY()
 	ASeniorProjectCharacter* Player;
+
+	UPROPERTY()
+	AItem* CraftedItem;
 
 protected:
 	UPROPERTY(BlueprintReadWrite)

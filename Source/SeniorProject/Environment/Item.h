@@ -37,16 +37,24 @@ public:
 	UPROPERTY(BlueprintReadWrite, Replicated)
 	bool bIsInteractable;
 
-protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UStaticMeshComponent* MeshComp;
-	
-	UPROPERTY(EditAnywhere)
-	float ChangeAmount;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enums")
 	EItemType ItemType;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UStaticMeshComponent* MeshComp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UCapsuleComponent* InteractCollision;
+
+protected:
+	UPROPERTY(EditAnywhere)
+	float ChangeAmount;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsEquippable;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
+	bool bIsEquipped;
 
 protected:
 	// Called when the game starts or when spawned

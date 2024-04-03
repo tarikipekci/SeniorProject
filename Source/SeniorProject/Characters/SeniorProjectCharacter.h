@@ -18,6 +18,8 @@ class URLineTraceComponent;
 class URPlayerStatComponent;
 class UWidgetComponent;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FItemEquipped, AItem*, EquippedItem);
+
 UCLASS(config=Game)
 class ASeniorProjectCharacter : public ACharacter
 {
@@ -49,7 +51,10 @@ class ASeniorProjectCharacter : public ACharacter
 
 public:
 	ASeniorProjectCharacter();
-	
+
+	UPROPERTY(BlueprintAssignable)
+	FItemEquipped ItemEquipped;
+
 	//Player Components
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
 	URPlayerStatComponent* PlayerStatComp;
@@ -68,7 +73,6 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
 	UWidgetComponent* PlayerNameTagComp;
-
 
 protected:
 	float RespawnDuration;
@@ -103,7 +107,7 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void Die();
-	
+
 	UFUNCTION(Server, Reliable)
 	void Server_UsePickup(AItem* Item);
 
@@ -137,17 +141,32 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UsePickup(AItem* Item);
 
-	UFUNCTION(Client,Reliable)
+	UFUNCTION(Client, Reliable)
 	void Client_OpenInventory();
 
-	UFUNCTION(Client,Reliable)
+	UFUNCTION(Client, Reliable)
 	void Client_CloseInventory();
-	
-	UFUNCTION(Server,Reliable)
+
+	UFUNCTION(Server, Reliable)
 	void Server_CloseInventoryBuilding();
 
 	UFUNCTION(Server, Reliable)
 	void Server_SetItemOwnership(AInventoryBuilding* SpawnedItem);
+
+	UFUNCTION(BlueprintCallable)
+	void EquipItem(AItem* EquippedItem);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void SetCollisionResponseToChannelOfEquippedItem(AItem* EquippedItem);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Server_EquipItem(AItem* EquippedItem);
+
+	UFUNCTION(BlueprintCallable)
+	void UnEquipItem(AItem* UnequippedItem);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Server_UnEquipItem(AItem* UnequippedItem);
 
 public:
 	/** Returns CameraBoom subobject **/

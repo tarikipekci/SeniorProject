@@ -22,11 +22,11 @@ class SENIORPROJECT_API URInventoryComponent : public UActorComponent
 public:
 	// Sets default values for this component's properties
 	URInventoryComponent();
-	
+
 	//Delegates
 	UPROPERTY(BlueprintAssignable)
 	FInventoryUpdated InventoryUpdated;
-	
+
 protected:
 	UPROPERTY(ReplicatedUsing= OnRep_InventoryUpdated, BlueprintReadWrite, Category = "Inventory")
 	TArray<FItemData> InventoryItems;
@@ -47,7 +47,7 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void Server_SwapItems(URInventoryComponent* TargetInventory, int Index1, int Index2);
-	
+
 	UFUNCTION(BlueprintCallable)
 	void OnRep_InventoryUpdated();
 
@@ -56,7 +56,7 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void Server_DecreaseItemAmount(int SlotIndex, int Amount);
-	
+
 	UFUNCTION(BlueprintCallable)
 	const TArray<FItemData>& GetInventoryItems() const { return InventoryItems; }
 
@@ -66,17 +66,26 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UseInventoryItem(int SlotIndex);
 
+	UFUNCTION(Server, Reliable)
+	void Server_UseInventoryItem(int SlotIndex);
+
 	UFUNCTION(BlueprintCallable)
 	void DropInventoryItem(int SlotIndex);
 
-	UFUNCTION(Server,Reliable)
+	UFUNCTION(Server, Reliable)
 	void Server_DropInventoryItem(int SlotIndex);
 
-	UFUNCTION(NetMulticast,Reliable)
-	void NetMulticast_DropItem(int SlotIndex, AActor* Item, FVector Location);
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticast_DropItem(int SlotIndex, AItem* Item, FVector Location);
 
-	UFUNCTION(NetMulticast,Reliable)
-	void NetMulticast_SpawnItem(int SlotIndex, AActor* Item, FVector Location);
+	UFUNCTION(BlueprintCallable)
+	AItem* GetEquippedItem() { return EquippedItem; }
+
+	UFUNCTION(BlueprintCallable)
+	void SetEquippedItem(AItem* Item) { EquippedItem = Item; }
+
+	UFUNCTION(BlueprintCallable)
+	void OnRep_ItemEquipped();
 
 private:
 	UPROPERTY()
@@ -90,4 +99,7 @@ private:
 
 	UPROPERTY()
 	int DropDepth;
+
+	UPROPERTY(ReplicatedUsing = OnRep_ItemEquipped)
+	AItem* EquippedItem;
 };
