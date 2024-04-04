@@ -70,5 +70,5 @@ public:
 	FItemData GetItemData() const {return ItemData;}
 
 	UFUNCTION(NetMulticast, Reliable)
-	void DestroyItem();
+	void HideItem();
 };

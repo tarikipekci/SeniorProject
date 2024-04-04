@@ -247,21 +247,17 @@ void ASeniorProjectCharacter::EquipItem(AItem* EquippedItem)
 	if(HasAuthority())
 	{
 		EquippedItem->SetActorHiddenInGame(false);
-		//EquippedItem->SetActorEnableCollision(true);
 		InventoryComp->SetEquippedItem(EquippedItem);
 		EquippedItem->bIsInteractable = false;
 		APlayerController* PlayerController = Cast<APlayerController>(this->GetController());
 		APawn* PlayerPawn = PlayerController->GetPawn();
 		USkeletalMeshComponent* SkeletalMesh = PlayerPawn->FindComponentByClass<USkeletalMeshComponent>();
 		FName SocketName = TEXT("ToolSocket");
-		SetCollisionResponseToChannelOfEquippedItem(EquippedItem);
 		SkeletalMesh->GetSocketByName(SocketName)->AttachActor(EquippedItem, SkeletalMesh);
 		const USkeletalMeshSocket* ToolSocket = SkeletalMesh->GetSocketByName(SocketName);
 	}
 	else
 	{
-		EquippedItem->SetActorHiddenInGame(false);
-		//EquippedItem->SetActorEnableCollision(true);
 		Server_EquipItem(EquippedItem);
 	}
 }
@@ -275,6 +271,7 @@ void ASeniorProjectCharacter::UnEquipItem(AItem* UnequippedItem)
 {
 	if(HasAuthority())
 	{
+		UnequippedItem->SetActorHiddenInGame(true);
 		APlayerController* PlayerController = Cast<APlayerController>(this->GetController());
 		APawn* PlayerPawn = PlayerController->GetPawn();
 		USkeletalMeshComponent* SkeletalMesh = PlayerPawn->FindComponentByClass<USkeletalMeshComponent>();

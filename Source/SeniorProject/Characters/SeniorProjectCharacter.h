@@ -18,8 +18,6 @@ class URLineTraceComponent;
 class URPlayerStatComponent;
 class UWidgetComponent;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FItemEquipped, AItem*, EquippedItem);
-
 UCLASS(config=Game)
 class ASeniorProjectCharacter : public ACharacter
 {
@@ -51,10 +49,7 @@ class ASeniorProjectCharacter : public ACharacter
 
 public:
 	ASeniorProjectCharacter();
-
-	UPROPERTY(BlueprintAssignable)
-	FItemEquipped ItemEquipped;
-
+	
 	//Player Components
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
 	URPlayerStatComponent* PlayerStatComp;
@@ -155,10 +150,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void EquipItem(AItem* EquippedItem);
-
-	UFUNCTION(BlueprintImplementableEvent)
-	void SetCollisionResponseToChannelOfEquippedItem(AItem* EquippedItem);
-
+	
 	UFUNCTION(NetMulticast, Reliable)
 	void Server_EquipItem(AItem* EquippedItem);
 

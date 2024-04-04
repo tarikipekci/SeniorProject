@@ -14,8 +14,10 @@
 AItem::AItem()
 {
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>("StaticMeshComponent");
-	InteractCollision = CreateDefaultSubobject<UCapsuleComponent>("InteractCollision");
 	RootComponent = MeshComp;
+	InteractCollision = CreateDefaultSubobject<UCapsuleComponent>("InteractCollision");
+	InteractCollision->SetupAttachment(MeshComp);
+    InteractCollision->SetRelativeLocation(FVector::ZeroVector);
 	bReplicates = true;
 	SetReplicatingMovement(true);
 	bIsInteractable = true;
@@ -27,6 +29,7 @@ void AItem::BeginPlay()
 {
 	Super::BeginPlay();
 	InteractCollision->SetCollisionProfileName("InteractCollision");
+	MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	bIsEquipped = false;
 }
 
@@ -36,7 +39,7 @@ void AItem::Interact(ASeniorProjectCharacter* Player)
 	{
 		if(Player->InventoryComp->AddItem(ItemData))
 		{
-			DestroyItem();
+			HideItem();
 		}
 	}
 }
@@ -59,11 +62,21 @@ void AItem::Use(ASeniorProjectCharacter* Player)
 	}
 	else if(ItemType == EItemType::Tool)
 	{
-		Player->EquipItem(this);
+		if(Player->InventoryComp->GetEquippedItem())
+		{
+			if(Player->InventoryComp->GetEquippedItem() == this)
+			{
+				Player->UnEquipItem(this);
+			}
+		}
+		else
+		{
+			Player->EquipItem(this);
+		}
 	}
 }
 
-void AItem::DestroyItem_Implementation()
+void AItem::HideItem_Implementation()
 {
 	SetActorHiddenInGame(true);
 	SetActorEnableCollision(false);

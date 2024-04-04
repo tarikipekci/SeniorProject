@@ -237,11 +237,6 @@ void URInventoryComponent::DropInventoryItem(int SlotIndex)
 	}
 }
 
-void URInventoryComponent::OnRep_ItemEquipped()
-{
-	Player->ItemEquipped.Broadcast(EquippedItem);
-}
-
 void URInventoryComponent::Server_DropInventoryItem_Implementation(int SlotIndex)
 {
 	DropInventoryItem(SlotIndex);

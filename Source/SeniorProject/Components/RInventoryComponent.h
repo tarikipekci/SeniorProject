@@ -84,9 +84,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetEquippedItem(AItem* Item) { EquippedItem = Item; }
 
-	UFUNCTION(BlueprintCallable)
-	void OnRep_ItemEquipped();
-
 private:
 	UPROPERTY()
 	ASeniorProjectCharacter* Player;
@@ -100,6 +97,6 @@ private:
 	UPROPERTY()
 	int DropDepth;
 
-	UPROPERTY(ReplicatedUsing = OnRep_ItemEquipped)
+	UPROPERTY(Replicated)
 	AItem* EquippedItem;
 };

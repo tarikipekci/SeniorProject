@@ -44,9 +44,6 @@ private:
 	UPROPERTY()
 	ASeniorProjectCharacter* Player;
 
-	UPROPERTY()
-	AItem* CraftedItem;
-
 protected:
 	UPROPERTY(BlueprintReadWrite)
 	URInventoryComponent* InventoryComp;
