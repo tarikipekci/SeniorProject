@@ -76,6 +76,7 @@ ASeniorProjectCharacter::ASeniorProjectCharacter()
 	StaminaDecrementTimerDuration = 0.1f;
 	JumpStaminaCost = 25.0f;
 	RespawnDuration = 5.0f;
+	bCanFillWater = false;
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
@@ -242,6 +243,26 @@ void ASeniorProjectCharacter::AttemptJump()
 	}
 }
 
+void ASeniorProjectCharacter::Client_CloseInteractionWidget_Implementation()
+{
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	if(PlayerController)
+	{
+		AHUD* Hud = PlayerController->GetHUD();
+
+		if(Hud)
+		{
+			if(ARHUD* ARHud = Cast<ARHUD>(Hud))
+			{
+				if(ARHud)
+				{
+					ARHud->InteractionWidget->SetVisibility(ESlateVisibility::Hidden);
+				}
+			}
+		}
+	}
+}
+
 void ASeniorProjectCharacter::EquipItem(AItem* EquippedItem)
 {
 	if(HasAuthority())
@@ -255,6 +276,7 @@ void ASeniorProjectCharacter::EquipItem(AItem* EquippedItem)
 		FName SocketName = TEXT("ToolSocket");
 		SkeletalMesh->GetSocketByName(SocketName)->AttachActor(EquippedItem, SkeletalMesh);
 		const USkeletalMeshSocket* ToolSocket = SkeletalMesh->GetSocketByName(SocketName);
+		bCanFillWater = IsPlayerHoldingBottle();
 	}
 	else
 	{
@@ -280,6 +302,7 @@ void ASeniorProjectCharacter::UnEquipItem(AItem* UnequippedItem)
 		UnequippedItem->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 		UnequippedItem->bIsInteractable = true;
 		InventoryComp->SetEquippedItem(nullptr);
+		bCanFillWater = false;
 	}
 	else
 	{

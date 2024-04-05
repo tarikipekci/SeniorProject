@@ -8,13 +8,14 @@
 #include "Camera/CameraComponent.h"
 #include "SeniorProject/Building/InventoryBuilding.h"
 #include "SeniorProject/Environment/InteractableInterface.h"
+#include "SeniorProject/Environment/InteractableNature.h"
 #include "SeniorProject/Environment/Item.h"
 
 // Sets default values for this component's properties
 URInteractComponent::URInteractComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-	InteractRange = 200.0f;
+	InteractRange = 250.0f;
 }
 
 // Called when the game starts
@@ -57,6 +58,10 @@ bool URInteractComponent::PerformInteractCheck()
 			{
 				InventoryBuildingFound.Broadcast(InventoryBuilding);
 			}
+			else
+			{
+				NatureActorFound.Broadcast(DetectedInteractableActor);
+			}
 			bIsInteracting = true;
 			return bIsInteracting;
 		}
@@ -67,7 +72,7 @@ bool URInteractComponent::PerformInteractCheck()
 
 void URInteractComponent::Interact()
 {
-	if(DetectedInteractableActor && bIsInteracting && DetectedInteractableActor)
+	if(DetectedInteractableActor && bIsInteracting)
 	{
 		AItem* InteractableItem = Cast<AItem>(DetectedInteractableActor);
 		if(InteractableItem)
@@ -77,8 +82,8 @@ void URInteractComponent::Interact()
 				return;
 			}
 		}
-			InteractedActor = DetectedInteractableActor;
-			Server_Interact(DetectedInteractableActor);
+		InteractedActor = DetectedInteractableActor;
+		Server_Interact(DetectedInteractableActor);
 	}
 }
 
@@ -88,7 +93,7 @@ void URInteractComponent::Server_Interact_Implementation(AActor* Actor)
 	{
 		FVector Start = Player->InteractComp->GetComponentLocation();
 		FVector End = Actor->GetActorLocation();
-		AActor* HitActor = Player->LineTraceComp->LineTraceSingle(Start, End, INTERACTABLE_CHANNEL, false);
+		AActor* HitActor = Player->LineTraceComp->LineTraceSingle(Start, End, INTERACTABLE_CHANNEL, true);
 		if(Actor && HitActor)
 		{
 			if(HitActor == Actor)
@@ -116,7 +121,20 @@ void URInteractComponent::Server_Interact_Implementation(AActor* Actor)
 						}
 					}
 				}
+				else if(HitActor->GetClass()->IsChildOf(AInteractableNature::StaticClass()))
+				{
+					AInteractableNature* InteractableNature = Cast<AInteractableNature>(HitActor);
+					if(InteractableNature)
+					{
+						if(IInteractableInterface* Interface = Cast<IInteractableInterface>(InteractableNature))
+						{
+							InteractableNature->Interact(Player);
+							InteractedActor = DetectedInteractableActor;
+						}
+					}
+				}
 			}
 		}
+	 Player->Client_CloseInteractionWidget();
 	}
 }

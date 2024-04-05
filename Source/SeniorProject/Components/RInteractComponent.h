@@ -15,6 +15,7 @@ class ASeniorProjectCharacter;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FPickUpFound, AItem*, Item);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInventoryBuildingFound, AInventoryBuilding*, InventoryBuilding);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FNatureActorFound, AActor*, InteractableNatureActor);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class SENIORPROJECT_API URInteractComponent : public USceneComponent
@@ -31,6 +32,9 @@ public:
 	
 	UPROPERTY(BlueprintAssignable)
 	FInventoryBuildingFound InventoryBuildingFound;
+
+	UPROPERTY(BlueprintAssignable)
+	FNatureActorFound NatureActorFound;
 
 	UFUNCTION(BlueprintCallable)
 	float GetInteractRange() const { return InteractRange; }

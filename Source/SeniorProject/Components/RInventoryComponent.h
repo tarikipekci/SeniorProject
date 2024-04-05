@@ -84,6 +84,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetEquippedItem(AItem* Item) { EquippedItem = Item; }
 
+	UFUNCTION(BlueprintCallable)
+	void ChangeItemFromInventory(UPARAM(ref) FItemData& OldItemData, UPARAM(ref) FItemData& NewItemData);
+
+	UFUNCTION(Server,Reliable)
+	void Server_ChangeItemFromInventory(FItemData OldItemData, FItemData NewItemData);
+
 private:
 	UPROPERTY()
 	ASeniorProjectCharacter* Player;

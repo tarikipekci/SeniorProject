@@ -237,6 +237,30 @@ void URInventoryComponent::DropInventoryItem(int SlotIndex)
 	}
 }
 
+void URInventoryComponent::ChangeItemFromInventory(FItemData& OldItemData, FItemData& NewItemData)
+{
+	if(Player->HasAuthority())
+	{
+		for(FItemData& CurrentItemData : InventoryItems)
+		{
+			if(CurrentItemData.ItemActor == OldItemData.ItemActor)
+			{
+				CurrentItemData = NewItemData;
+			}
+		}
+	}
+	else
+	{
+		Server_ChangeItemFromInventory(OldItemData, NewItemData);
+	}
+	OnRep_InventoryUpdated();
+}
+
+void URInventoryComponent::Server_ChangeItemFromInventory_Implementation(FItemData OldItemData, FItemData NewItemData)
+{
+	ChangeItemFromInventory(OldItemData, NewItemData);
+}
+
 void URInventoryComponent::Server_DropInventoryItem_Implementation(int SlotIndex)
 {
 	DropInventoryItem(SlotIndex);

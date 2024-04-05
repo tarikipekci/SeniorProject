@@ -72,6 +72,9 @@ public:
 protected:
 	float RespawnDuration;
 
+	UPROPERTY(BlueprintReadWrite)
+	bool bCanFillWater;
+
 	//Stamina Properties
 	bool bIsSprinting;
 	float StaminaDecrementTimerDuration;
@@ -145,6 +148,9 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_CloseInventoryBuilding();
 
+	UFUNCTION(Client,Reliable)
+	void Client_CloseInteractionWidget();
+
 	UFUNCTION(Server, Reliable)
 	void Server_SetItemOwnership(AInventoryBuilding* SpawnedItem);
 
@@ -160,6 +166,15 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Server_UnEquipItem(AItem* UnequippedItem);
 
+	UFUNCTION()
+	bool GetCanFillWater(){return bCanFillWater;}
+
+	UFUNCTION(BlueprintImplementableEvent)
+	bool IsPlayerHoldingBottle();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void GiveEmptyBottleBack(AItem* FullBottle);
+	
 public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }

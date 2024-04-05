@@ -55,6 +55,7 @@ void AItem::Use(ASeniorProjectCharacter* Player)
 	else if(ItemType == EItemType::Drinkable)
 	{
 		Player->PlayerStatComp->DecreaseThirst(ChangeAmount);
+		Player->GiveEmptyBottleBack(this);
 	}
 	else if(ItemType == EItemType::Health)
 	{
