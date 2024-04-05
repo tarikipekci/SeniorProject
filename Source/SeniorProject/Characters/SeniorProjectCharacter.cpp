@@ -77,6 +77,8 @@ ASeniorProjectCharacter::ASeniorProjectCharacter()
 	JumpStaminaCost = 25.0f;
 	RespawnDuration = 5.0f;
 	bCanFillWater = false;
+	DefaultWalkSpeed = 300.0f; 
+    SprintSpeed = 600.0f;
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
@@ -151,36 +153,35 @@ void ASeniorProjectCharacter::SetupPlayerInputComponent(class UInputComponent* P
 
 void ASeniorProjectCharacter::Move(const FInputActionValue& Value)
 {
-	// input is a Vector2D
-	FVector2D MovementVector = Value.Get<FVector2D>();
+    // input is a Vector2D
+    FVector2D MovementVector = Value.Get<FVector2D>();
 
-	if(Controller != nullptr)
-	{
-		// find out which way is forward
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
+    if (Controller != nullptr)
+    {
+        // find out which way is forward
+        const FRotator Rotation = Controller->GetControlRotation();
+        const FRotator YawRotation(0, Rotation.Yaw, 0);
 
-		// get forward vector
-		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+        // get forward vector
+        const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 
-		// get right vector 
-		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+        // get right vector 
+        const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
+        // adjust max walk speed based on sprinting state
+        if (!bIsSprinting)
+        {
+            GetCharacterMovement()->MaxWalkSpeed = DefaultWalkSpeed; // DefaultWalkSpeed is a float variable that stores your default walking speed
+        }
+        else
+        {
+            GetCharacterMovement()->MaxWalkSpeed = SprintSpeed; // SprintSpeed is a float variable that stores your sprinting speed
+        }
 
-		if(!bIsSprinting)
-		{
-			MovementVector.Y *= 0.5f;
-			MovementVector.X *= 0.5f;
-		}
-		else
-		{
-			MovementVector.Y *= 1.0f;
-			MovementVector.X *= 1.0f;
-		}
-		// add movement 
-		AddMovementInput(ForwardDirection, MovementVector.Y);
-		AddMovementInput(RightDirection, MovementVector.X);
-	}
+        // add movement 
+        AddMovementInput(ForwardDirection, MovementVector.Y);
+        AddMovementInput(RightDirection, MovementVector.X);
+    }
 }
 
 void ASeniorProjectCharacter::Look(const FInputActionValue& Value)

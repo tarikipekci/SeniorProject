@@ -80,6 +80,9 @@ protected:
 	float StaminaDecrementTimerDuration;
 	float JumpStaminaCost;
 
+	float DefaultWalkSpeed;
+	float SprintSpeed;
+
 	//Timers
 	FTimerHandle SprintingHandle;
 	FTimerHandle DestroyHandle;
