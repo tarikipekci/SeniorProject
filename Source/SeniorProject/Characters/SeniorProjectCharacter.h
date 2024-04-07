@@ -49,6 +49,10 @@ class ASeniorProjectCharacter : public ACharacter
 
 public:
 	ASeniorProjectCharacter();
+
+	//Animations
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UAnimMontage* PlayerAttackMontage;
 	
 	//Player Components
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
