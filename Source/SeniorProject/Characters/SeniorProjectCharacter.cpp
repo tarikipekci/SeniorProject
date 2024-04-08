@@ -77,8 +77,8 @@ ASeniorProjectCharacter::ASeniorProjectCharacter()
 	JumpStaminaCost = 25.0f;
 	RespawnDuration = 5.0f;
 	bCanFillWater = false;
-	DefaultWalkSpeed = 300.0f; 
-    SprintSpeed = 600.0f;
+	DefaultWalkSpeed = 300.0f;
+	SprintSpeed = 600.0f;
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
@@ -153,35 +153,25 @@ void ASeniorProjectCharacter::SetupPlayerInputComponent(class UInputComponent* P
 
 void ASeniorProjectCharacter::Move(const FInputActionValue& Value)
 {
-    // input is a Vector2D
-    FVector2D MovementVector = Value.Get<FVector2D>();
+	// input is a Vector2D
+	FVector2D MovementVector = Value.Get<FVector2D>();
 
-    if (Controller != nullptr)
-    {
-        // find out which way is forward
-        const FRotator Rotation = Controller->GetControlRotation();
-        const FRotator YawRotation(0, Rotation.Yaw, 0);
+	if(Controller != nullptr)
+	{
+		// find out which way is forward
+		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator YawRotation(0, Rotation.Yaw, 0);
 
-        // get forward vector
-        const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		// get forward vector
+		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 
-        // get right vector 
-        const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-
-        // adjust max walk speed based on sprinting state
-        if (!bIsSprinting)
-        {
-            GetCharacterMovement()->MaxWalkSpeed = DefaultWalkSpeed; // DefaultWalkSpeed is a float variable that stores your default walking speed
-        }
-        else
-        {
-            GetCharacterMovement()->MaxWalkSpeed = SprintSpeed; // SprintSpeed is a float variable that stores your sprinting speed
-        }
-
-        // add movement 
-        AddMovementInput(ForwardDirection, MovementVector.Y);
-        AddMovementInput(RightDirection, MovementVector.X);
-    }
+		// get right vector 
+		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+		
+		// add movement 
+		AddMovementInput(ForwardDirection, MovementVector.Y);
+		AddMovementInput(RightDirection, MovementVector.X);
+	}
 }
 
 void ASeniorProjectCharacter::Look(const FInputActionValue& Value)
@@ -202,6 +192,7 @@ void ASeniorProjectCharacter::StartSprinting()
 	if(PlayerStatComp->GetStamina() > 0 && GetVelocity().Size())
 	{
 		bIsSprinting = true;
+		ChangeMovementSpeed();
 		PlayerStatComp->ControlSprintingTimer(true);
 	}
 	else if(PlayerStatComp->GetStamina() <= 0.0f)
@@ -213,6 +204,7 @@ void ASeniorProjectCharacter::StartSprinting()
 void ASeniorProjectCharacter::StopSprinting()
 {
 	bIsSprinting = false;
+	ChangeMovementSpeed();
 	PlayerStatComp->ControlSprintingTimer(false);
 }
 

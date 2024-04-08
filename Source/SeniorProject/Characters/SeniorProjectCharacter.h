@@ -80,11 +80,16 @@ protected:
 	bool bCanFillWater;
 
 	//Stamina Properties
+	UPROPERTY(BlueprintReadWrite)
 	bool bIsSprinting;
+
 	float StaminaDecrementTimerDuration;
 	float JumpStaminaCost;
 
+	UPROPERTY(BlueprintReadWrite)
 	float DefaultWalkSpeed;
+
+	UPROPERTY(BlueprintReadWrite)
 	float SprintSpeed;
 
 	//Timers
@@ -100,10 +105,13 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void StartSprinting();
-
+	
 	UFUNCTION(BlueprintCallable)
 	void StopSprinting();
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void ChangeMovementSpeed();
+	
 	UFUNCTION(BlueprintCallable)
 	void HandleSprinting();
 
