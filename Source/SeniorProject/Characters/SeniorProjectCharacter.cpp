@@ -10,10 +10,10 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "TimerManager.h"
-#include "Engine/DamageEvents.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "SeniorProject/Building/InventoryBuilding.h"
 #include "SeniorProject/Components/RCraftComponent.h"
+#include "SeniorProject/Components/RDamageComponent.h"
 #include "SeniorProject/Components/RInteractComponent.h"
 #include "SeniorProject/Components/RInventoryComponent.h"
 #include "SeniorProject/Components/RLineTraceComponent.h"
@@ -260,6 +260,10 @@ void ASeniorProjectCharacter::EquipItem(AItem* EquippedItem)
 {
 	if(HasAuthority())
 	{
+		if(InventoryComp->GetEquippedItem())
+		{
+			UnEquipItem(InventoryComp->GetEquippedItem());
+		}
 		EquippedItem->SetActorHiddenInGame(false);
 		InventoryComp->SetEquippedItem(EquippedItem);
 		EquippedItem->bIsInteractable = false;
@@ -270,6 +274,7 @@ void ASeniorProjectCharacter::EquipItem(AItem* EquippedItem)
 		SkeletalMesh->GetSocketByName(SocketName)->AttachActor(EquippedItem, SkeletalMesh);
 		const USkeletalMeshSocket* ToolSocket = SkeletalMesh->GetSocketByName(SocketName);
 		bCanFillWater = IsPlayerHoldingBottle();
+		EquippedItem->bIsEquipped = true;
 	}
 	else
 	{
@@ -295,6 +300,7 @@ void ASeniorProjectCharacter::UnEquipItem(AItem* UnequippedItem)
 		UnequippedItem->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 		UnequippedItem->bIsInteractable = true;
 		InventoryComp->SetEquippedItem(nullptr);
+		UnequippedItem->bIsEquipped = false;
 		bCanFillWater = false;
 	}
 	else
@@ -310,39 +316,31 @@ void ASeniorProjectCharacter::Server_UnEquipItem_Implementation(AItem* Unequippe
 
 void ASeniorProjectCharacter::Attack()
 {
-	FVector Start = InteractComp->GetComponentLocation();
-	FVector End = Start + FollowCamera->GetForwardVector() * InteractComp->GetInteractRange();
-	AActor* Actor = LineTraceComp->LineTraceSingle(Start, End, INTERACTABLE_CHANNEL, false);
-	if(Actor)
+	if(HasAuthority())
 	{
-		ASeniorProjectCharacter* Player = Cast<ASeniorProjectCharacter>(Actor);
-		if(Player)
+		if(InventoryComp->GetEquippedItem())
 		{
-			Server_Attack(Player);
-		}
-	}
-}
-
-void ASeniorProjectCharacter::Server_Attack_Implementation(AActor* Actor)
-{
-	if(GetOwner()->GetLocalRole() == ROLE_Authority)
-	{
-		FVector Start = InteractComp->GetComponentLocation();
-		FVector End = Actor->GetActorLocation();
-		AActor* HitActor = LineTraceComp->LineTraceSingle(Start, End, INTERACTABLE_CHANNEL, true);
-		if(Actor)
-		{
-			ASeniorProjectCharacter* Player = Cast<ASeniorProjectCharacter>(HitActor);
-			if(Player)
+			URDamageComponent* DamageComp = InventoryComp->GetEquippedItem()->FindComponentByClass<URDamageComponent>();
+			if(DamageComp)
 			{
-				if(Player == Actor)
-				{
-					float TestDamage = 20.f;
-					Player->TakeDamage(TestDamage, FDamageEvent(), GetController(), this);
-				}
+				NetMulticast_PlayAttackAnimation(DamageComp);
 			}
 		}
 	}
+	else
+	{
+		Server_Attack();
+	}
+}
+
+void ASeniorProjectCharacter::Server_Attack_Implementation()
+{
+	Attack();
+}
+
+void ASeniorProjectCharacter::NetMulticast_PlayAttackAnimation_Implementation(URDamageComponent* DamageComp)
+{
+	PlayAnimMontage(DamageComp->GetAttackAnimMontage());
 }
 
 void ASeniorProjectCharacter::Die()

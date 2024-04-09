@@ -19,6 +19,14 @@ enum class EItemType : uint8
 	Health UMETA(DisplayName = "Health")
 };
 
+UENUM(BlueprintType)
+enum class EDamageType : uint8
+{
+	None UMETA(DisplayName = "None"),
+	Mine UMETA(DisplayName = "Mine"),
+	Slash UMETA(DisplayName = "Slash")
+};
+
 class ASeniorProjectCharacter;
 
 UCLASS()
@@ -40,6 +48,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enums")
 	EItemType ItemType;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
+	bool bIsEquipped;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* MeshComp;
 
@@ -53,9 +64,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsEquippable;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
-	bool bIsEquipped;
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -68,7 +76,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	FItemData GetItemData() const {return ItemData;}
-
+	
 	UFUNCTION(NetMulticast, Reliable)
 	void HideItem();
 };

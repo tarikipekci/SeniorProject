@@ -9,7 +9,6 @@ URLifeComponent::URLifeComponent()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-	CurrentHitPoint = MaxHitPoint;
 	// ...
 }
 
@@ -18,9 +17,7 @@ URLifeComponent::URLifeComponent()
 void URLifeComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// ...
-	
+	CurrentHitPoints = MaxHitPoints;
 }
 
 
@@ -30,5 +27,17 @@ void URLifeComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
+}
+
+void URLifeComponent::DecreaseHitPoints(int DecreasedAmount)
+{
+	if(CurrentHitPoints - DecreasedAmount <= 0)
+	{
+		GetOwner()->Destroy();
+	}
+	else
+	{
+		CurrentHitPoints -= DecreasedAmount;
+	}
 }
 

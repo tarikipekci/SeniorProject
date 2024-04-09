@@ -16,6 +16,9 @@ public:
 	// Sets default values for this component's properties
 	URLifeComponent();
 
+	UFUNCTION()
+	void DecreaseHitPoints(int DecreasedAmount);
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -27,8 +30,8 @@ public:
 protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int CurrentHitPoint;
+	int CurrentHitPoints;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int MaxHitPoint;
+	int MaxHitPoints;
 };

@@ -10,6 +10,7 @@
 #include "SeniorProjectCharacter.generated.h"
 
 
+class URDamageComponent;
 class URCraftComponent;
 class AInventoryBuilding;
 class URInventoryComponent;
@@ -49,7 +50,7 @@ class ASeniorProjectCharacter : public ACharacter
 
 public:
 	ASeniorProjectCharacter();
-
+	
 	//Animations
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UAnimMontage* PlayerAttackMontage;
@@ -131,7 +132,10 @@ protected:
 	void Attack();
 
 	UFUNCTION(Server, Reliable)
-	void Server_Attack(AActor* Actor);
+	void Server_Attack();
+
+	UFUNCTION(NetMulticast,Reliable)
+	void NetMulticast_PlayAttackAnimation(URDamageComponent* DamageComp);
 
 protected:
 	// APawn interface
@@ -189,7 +193,7 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void GiveEmptyBottleBack(AItem* FullBottle);
-	
+
 public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }

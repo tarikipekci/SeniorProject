@@ -6,14 +6,15 @@
 #include "GameFramework/Actor.h"
 #include "LootableActor.generated.h"
 
+enum class EDamageType : uint8;
 class URLifeComponent;
 
 UCLASS()
 class SENIORPROJECT_API ALootableActor : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
 	ALootableActor();
 
@@ -21,12 +22,23 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION(BlueprintCallable)
+	URLifeComponent* GetLifeComponent() {return LifeComp;}
+
+	UFUNCTION(BlueprintCallable)
+	EDamageType GetEffectiveDamageType() {return EffectiveDamageType;}
 
 protected:
+	UPROPERTY(VisibleAnywhere)
 	URLifeComponent* LifeComp;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UStaticMeshComponent* MeshComp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EDamageType EffectiveDamageType;
 };

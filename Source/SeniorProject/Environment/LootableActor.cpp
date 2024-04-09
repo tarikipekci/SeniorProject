@@ -11,19 +11,19 @@ ALootableActor::ALootableActor()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	LifeComp = CreateDefaultSubobject<URLifeComponent>("LifeComponent");
+	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>("StaticMeshComponent");
 }
 
 // Called when the game starts or when spawned
 void ALootableActor::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
 void ALootableActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
+
 

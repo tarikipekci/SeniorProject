@@ -3,6 +3,12 @@
 
 #include "RDamageComponent.h"
 
+#include "RLifeComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "SeniorProject/AttackAnimNotifyState.h"
+#include "SeniorProject/Environment/Item.h"
+#include "SeniorProject/Environment/LootableActor.h"
+
 // Sets default values for this component's properties
 URDamageComponent::URDamageComponent()
 {
@@ -19,16 +25,75 @@ void URDamageComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
-	
+	InitAnimations();
+	bIsAnimPlayed = false;
 }
 
 
 // Called every frame
-void URDamageComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void URDamageComponent::TickComponent(float DeltaTime, ELevelTick TickType,
+                                      FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
 }
 
+void URDamageComponent::InitAnimations()
+{
+	if(PlayerAttackMontage)
+	{
+		const auto NotifyEvents = PlayerAttackMontage->Notifies;
+		for(auto EventNotify : NotifyEvents)
+		{
+			if(const auto AttackNotify = Cast<UAttackAnimNotifyState>(EventNotify.NotifyStateClass))
+			{
+				AttackNotify->OnNotifyBegin.AddDynamic(this, &URDamageComponent::ToggleCollisionOfTool);
+				AttackNotify->OnNotifyTick.AddDynamic(this, &URDamageComponent::CheckOverlapping);
+				AttackNotify->OnNotifyEnd.AddDynamic(this, &URDamageComponent::OnAnimationFinish);
+			}
+		}
+	}
+}
+
+void URDamageComponent::ToggleCollisionOfTool()
+{
+	AItem* OwnerItem = Cast<AItem>(GetOwner());
+	if(OwnerItem)
+	{
+		if(OwnerItem->bIsEquipped)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Cyan, OwnerItem->GetName());
+			OwnerItem->SetActorEnableCollision(true);
+			OwnerItem->InteractCollision->SetCollisionProfileName("OverlapAll");
+		}
+	}
+}
+
+void URDamageComponent::CheckOverlapping()
+{
+	if(bIsAnimPlayed == false)
+	{
+		TArray<AActor*> OverlappingActors;
+		Cast<AItem>(GetOwner())->InteractCollision->GetOverlappingActors(OverlappingActors);
+
+		for(auto OverlappedActor : OverlappingActors)
+		{
+			if(OverlappedActor->GetClass()->IsChildOf(ALootableActor::StaticClass()))
+			{
+				ALootableActor* LootableActor = Cast<ALootableActor>(OverlappedActor);
+				if(DamageType == LootableActor->GetEffectiveDamageType())
+				{
+					LootableActor->GetLifeComponent()->DecreaseHitPoints(DamageAmount);
+				}
+				bIsAnimPlayed = true;
+				break;
+			}
+		}
+	}
+}
+
+void URDamageComponent::OnAnimationFinish()
+{
+	bIsAnimPlayed = false;
+}
