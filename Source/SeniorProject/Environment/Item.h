@@ -24,7 +24,8 @@ enum class EDamageType : uint8
 {
 	None UMETA(DisplayName = "None"),
 	Mine UMETA(DisplayName = "Mine"),
-	Slash UMETA(DisplayName = "Slash")
+	Slash UMETA(DisplayName = "Slash"),
+	Axe UMETA(DisplayName = "Axe")
 };
 
 class ASeniorProjectCharacter;

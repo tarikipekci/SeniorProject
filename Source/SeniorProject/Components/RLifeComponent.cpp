@@ -3,6 +3,8 @@
 
 #include "RLifeComponent.h"
 
+#include "SeniorProject/Environment/LootableActor.h"
+
 // Sets default values for this component's properties
 URLifeComponent::URLifeComponent()
 {
@@ -34,6 +36,7 @@ void URLifeComponent::DecreaseHitPoints(int DecreasedAmount)
 	if(CurrentHitPoints - DecreasedAmount <= 0)
 	{
 		GetOwner()->Destroy();
+		Cast<ALootableActor>(GetOwner())->DropLootItems();
 	}
 	else
 	{

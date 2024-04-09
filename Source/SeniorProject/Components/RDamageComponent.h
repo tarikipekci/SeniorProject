@@ -35,10 +35,10 @@ public:
 	UAnimMontage* GetAttackAnimMontage() {return PlayerAttackMontage;}
 	
 	UFUNCTION()
-	void ToggleCollisionOfTool();
+	void OnAnimationBegin();
 	
 	UFUNCTION()
-	void CheckOverlapping();
+	void OnAnimation();
 
 	UFUNCTION()
 	void OnAnimationFinish();

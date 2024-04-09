@@ -3,6 +3,7 @@
 
 #include "LootableActor.h"
 
+#include "Item.h"
 #include "SeniorProject/Components/RLifeComponent.h"
 
 // Sets default values
@@ -12,6 +13,7 @@ ALootableActor::ALootableActor()
 	PrimaryActorTick.bCanEverTick = true;
 	LifeComp = CreateDefaultSubobject<URLifeComponent>("LifeComponent");
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>("StaticMeshComponent");
+	RootComponent = MeshComp;
 }
 
 // Called when the game starts or when spawned
@@ -24,6 +26,16 @@ void ALootableActor::BeginPlay()
 void ALootableActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
+
+void ALootableActor::DropLootItems()
+{
+	for(auto ItemClass : LootItemClasses)
+	{
+		int RandomNumber = FMath::RandRange(0, 200);
+		FVector RandomVector = FVector(RandomNumber,RandomNumber,0);
+		AItem* DroppedLoot = GetWorld()->SpawnActor<AItem>(ItemClass, GetActorLocation() + RandomVector, FRotator(0, 0, 0));
+	}
 }
 
 

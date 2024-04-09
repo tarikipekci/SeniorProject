@@ -48,29 +48,28 @@ void URDamageComponent::InitAnimations()
 		{
 			if(const auto AttackNotify = Cast<UAttackAnimNotifyState>(EventNotify.NotifyStateClass))
 			{
-				AttackNotify->OnNotifyBegin.AddDynamic(this, &URDamageComponent::ToggleCollisionOfTool);
-				AttackNotify->OnNotifyTick.AddDynamic(this, &URDamageComponent::CheckOverlapping);
+				AttackNotify->OnNotifyBegin.AddDynamic(this, &URDamageComponent::OnAnimationBegin);
+				AttackNotify->OnNotifyTick.AddDynamic(this, &URDamageComponent::OnAnimation);
 				AttackNotify->OnNotifyEnd.AddDynamic(this, &URDamageComponent::OnAnimationFinish);
 			}
 		}
 	}
 }
 
-void URDamageComponent::ToggleCollisionOfTool()
+void URDamageComponent::OnAnimationBegin()
 {
 	AItem* OwnerItem = Cast<AItem>(GetOwner());
 	if(OwnerItem)
 	{
 		if(OwnerItem->bIsEquipped)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Cyan, OwnerItem->GetName());
 			OwnerItem->SetActorEnableCollision(true);
 			OwnerItem->InteractCollision->SetCollisionProfileName("OverlapAll");
 		}
 	}
 }
 
-void URDamageComponent::CheckOverlapping()
+void URDamageComponent::OnAnimation()
 {
 	if(bIsAnimPlayed == false)
 	{
@@ -96,4 +95,13 @@ void URDamageComponent::CheckOverlapping()
 void URDamageComponent::OnAnimationFinish()
 {
 	bIsAnimPlayed = false;
+
+	AItem* OwnerItem = Cast<AItem>(GetOwner());
+	if(OwnerItem)
+	{
+		if(OwnerItem->bIsEquipped)
+		{
+			OwnerItem->SetActorEnableCollision(false);
+		}
+	}
 }

@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "LootableActor.generated.h"
 
+class AItem;
 enum class EDamageType : uint8;
 class URLifeComponent;
 
@@ -32,6 +33,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	EDamageType GetEffectiveDamageType() {return EffectiveDamageType;}
 
+	UFUNCTION()
+	void DropLootItems();
+
 protected:
 	UPROPERTY(VisibleAnywhere)
 	URLifeComponent* LifeComp;
@@ -41,4 +45,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EDamageType EffectiveDamageType;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	TArray<TSubclassOf<AItem>> LootItemClasses;
 };

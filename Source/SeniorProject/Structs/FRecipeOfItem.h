@@ -16,4 +16,7 @@ struct FRecipeOfItem
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<AItem> CraftedItem;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString RecipeDescription;
 };

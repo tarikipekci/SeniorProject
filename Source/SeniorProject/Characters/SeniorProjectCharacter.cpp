@@ -260,12 +260,8 @@ void ASeniorProjectCharacter::EquipItem(AItem* EquippedItem)
 {
 	if(HasAuthority())
 	{
-		if(InventoryComp->GetEquippedItem())
-		{
-			UnEquipItem(InventoryComp->GetEquippedItem());
-		}
-		EquippedItem->SetActorHiddenInGame(false);
 		InventoryComp->SetEquippedItem(EquippedItem);
+		EquippedItem->SetActorHiddenInGame(false);
 		EquippedItem->bIsInteractable = false;
 		APlayerController* PlayerController = Cast<APlayerController>(this->GetController());
 		APawn* PlayerPawn = PlayerController->GetPawn();

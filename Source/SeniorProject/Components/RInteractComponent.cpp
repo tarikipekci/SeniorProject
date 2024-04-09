@@ -93,7 +93,7 @@ void URInteractComponent::Server_Interact_Implementation(AActor* Actor)
 	{
 		FVector Start = Player->InteractComp->GetComponentLocation();
 		FVector End = Actor->GetActorLocation();
-		AActor* HitActor = Player->LineTraceComp->LineTraceSingle(Start, End, INTERACTABLE_CHANNEL, true);
+		AActor* HitActor = Player->LineTraceComp->LineTraceSingle(Start, End, INTERACTABLE_CHANNEL, false);
 		if(Actor && HitActor)
 		{
 			if(HitActor == Actor)
