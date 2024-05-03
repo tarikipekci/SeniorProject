@@ -28,8 +28,8 @@ URPlayerStatComponent::URPlayerStatComponent()
 	MaxStamina = 100.0f;
 	Stamina = MaxStamina;
 	StaminaRegenerationTimerDuration = 0.5f;
-	StaminaDecrementValue = 2.5f;
-	StaminaIncrementValue = 3.0f;
+	StaminaDecrementValue = 1.5f;
+	StaminaIncrementValue = 2.5f;
 
 	//Health
 	MaxHealth = 100.0f;

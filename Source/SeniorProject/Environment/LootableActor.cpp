@@ -30,11 +30,15 @@ void ALootableActor::Tick(float DeltaTime)
 
 void ALootableActor::DropLootItems()
 {
-	for(auto ItemClass : LootItemClasses)
+	if(HasAuthority())
 	{
-		int RandomNumber = FMath::RandRange(0, 200);
-		FVector RandomVector = FVector(RandomNumber,RandomNumber,0);
-		AItem* DroppedLoot = GetWorld()->SpawnActor<AItem>(ItemClass, GetActorLocation() + RandomVector, FRotator(0, 0, 0));
+		for(auto ItemClass : LootItemClasses)
+		{
+			int RandomNumber = FMath::RandRange(0, 200);
+			FVector RandomVector = FVector(RandomNumber, RandomNumber, 0);
+			AItem* DroppedLoot = GetWorld()->SpawnActor<AItem>(ItemClass, GetActorLocation() + RandomVector,
+			                                                   FRotator(0, 0, 0));
+		}
 	}
 }
 
