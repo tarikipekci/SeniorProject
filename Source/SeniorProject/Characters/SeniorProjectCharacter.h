@@ -97,6 +97,11 @@ protected:
 	FTimerHandle SprintingHandle;
 	FTimerHandle DestroyHandle;
 
+private:
+	class UAIPerceptionStimuliSourceComponent* StimulusSource;
+
+	void SetupStimulusSource();
+
 protected:
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);

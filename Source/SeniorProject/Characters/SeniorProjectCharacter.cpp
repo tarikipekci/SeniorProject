@@ -11,6 +11,8 @@
 #include "EnhancedInputSubsystems.h"
 #include "TimerManager.h"
 #include "Engine/SkeletalMeshSocket.h"
+#include "Perception/AIPerceptionStimuliSourceComponent.h"
+#include "Perception/AISense_Sight.h"
 #include "SeniorProject/Building/InventoryBuilding.h"
 #include "SeniorProject/Components/RCraftComponent.h"
 #include "SeniorProject/Components/RDamageComponent.h"
@@ -74,11 +76,12 @@ ASeniorProjectCharacter::ASeniorProjectCharacter()
 	InteractComp->SetupAttachment(RootComponent);
 	bIsSprinting = false;
 	StaminaDecrementTimerDuration = 0.1f;
-	JumpStaminaCost = 25.0f;
+	JumpStaminaCost = 20.0f;
 	RespawnDuration = 5.0f;
 	bCanFillWater = false;
-	DefaultWalkSpeed = 300.0f;
-	SprintSpeed = 600.0f;
+	DefaultWalkSpeed = 230.0f;
+	SprintSpeed = 500.0f;
+	SetupStimulusSource();
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
@@ -148,6 +151,16 @@ void ASeniorProjectCharacter::SetupPlayerInputComponent(class UInputComponent* P
 
 		//Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ASeniorProjectCharacter::Look);
+	}
+}
+
+void ASeniorProjectCharacter::SetupStimulusSource()
+{
+	StimulusSource = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("Stimulus"));
+	if(StimulusSource)
+	{
+		StimulusSource->RegisterForSense(TSubclassOf<UAISense_Sight>());
+		StimulusSource->RegisterWithPerceptionSystem();
 	}
 }
 
