@@ -3,10 +3,10 @@
 
 #include "BTTask_FindRandomLocation.h"
 
-#include "Animal.h"
-#include "Animal_AIController.h"
 #include "NavigationSystem.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "SeniorProject/Characters/Animal.h"
+#include "SeniorProject/Controllers/Animal_AIController.h"
 
 class AAnimal;
 

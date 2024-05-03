@@ -5,9 +5,8 @@
 
 #include "RLifeComponent.h"
 #include "Components/CapsuleComponent.h"
-#include "SeniorProject/AttackAnimNotifyState.h"
 #include "SeniorProject/Environment/Item.h"
-#include "SeniorProject/Environment/LootableActor.h"
+#include "SeniorProject/Notifies/AttackAnimNotifyState.h"
 
 // Sets default values for this component's properties
 URDamageComponent::URDamageComponent()
@@ -78,12 +77,12 @@ void URDamageComponent::OnAnimation()
 
 		for(auto OverlappedActor : OverlappingActors)
 		{
-			if(OverlappedActor->GetClass()->IsChildOf(ALootableActor::StaticClass()))
+			if(OverlappedActor->FindComponentByClass<URLifeComponent>())
 			{
-				ALootableActor* LootableActor = Cast<ALootableActor>(OverlappedActor);
-				if(DamageType == LootableActor->GetEffectiveDamageType())
+				URLifeComponent* LifeComp = Cast<URLifeComponent>(OverlappedActor->FindComponentByClass<URLifeComponent>());
+				if(DamageType == LifeComp->GetEffectiveDamageType())
 				{
-					LootableActor->GetLifeComponent()->DecreaseHitPoints(DamageAmount);
+					LifeComp->DecreaseHitPoints(DamageAmount);
 				}
 				bIsAnimPlayed = true;
 				break;

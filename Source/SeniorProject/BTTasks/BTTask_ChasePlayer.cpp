@@ -3,9 +3,9 @@
 
 #include "BTTask_ChasePlayer.h"
 
-#include "Animal_AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
+#include "SeniorProject/Controllers/Animal_AIController.h"
 
 UBTTask_ChasePlayer::UBTTask_ChasePlayer(FObjectInitializer const& ObjectInitializer)
 {

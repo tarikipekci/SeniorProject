@@ -5,6 +5,7 @@
 
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "SeniorProject/Components/RLifeComponent.h"
 
 // Sets default values
 AAnimal::AAnimal()
@@ -12,8 +13,9 @@ AAnimal::AAnimal()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	CapsuleCollision = CreateDefaultSubobject<UCapsuleComponent>("CapsuleCollision");
-	CapsuleCollision->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
+	CapsuleCollision->SetRelativeLocation(FVector::ZeroVector);
 	CapsuleCollision->SetupAttachment(RootComponent);
+	LifeComp = CreateDefaultSubobject<URLifeComponent>("LifeComponent");
 	WalkSpeed = 200;
 	GallopSpeed = 400;
 }

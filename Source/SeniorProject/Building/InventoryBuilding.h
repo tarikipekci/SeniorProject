@@ -26,10 +26,7 @@ protected:
 public:
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
 	URInventoryComponent* InventoryComp;
-
-	UPROPERTY(EditAnywhere)
-	UStaticMeshComponent* MeshComp;
-
+	
 	UFUNCTION(Server,Reliable)
 	void Server_OpenInventory(ASeniorProjectCharacter* Player);
 	

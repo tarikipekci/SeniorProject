@@ -3,13 +3,13 @@
 
 #include "Animal_AIController.h"
 
-#include "Animal.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "Characters/SeniorProjectCharacter.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AIPerceptionTypes.h"
 #include "Perception/AISenseConfig_Sight.h"
+#include "SeniorProject/Characters/Animal.h"
+#include "SeniorProject/Characters/SeniorProjectCharacter.h"
 
 AAnimal_AIController::AAnimal_AIController(FObjectInitializer const& ObjectInitializer)
 {

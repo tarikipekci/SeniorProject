@@ -16,8 +16,16 @@ class SENIORPROJECT_API AInteractableBuilding : public ABaseBuilding, public IIn
 	GENERATED_BODY()
 
 public:
+	AInteractableBuilding();
+
 	virtual void Interact(ASeniorProjectCharacter* Player) override;
 
 	UFUNCTION(BlueprintCallable)
 	virtual void Use(ASeniorProjectCharacter* Player) override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UCapsuleComponent* InteractCollision;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UStaticMeshComponent* MeshComp;
 };

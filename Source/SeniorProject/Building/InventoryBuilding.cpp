@@ -19,8 +19,6 @@ void AInventoryBuilding::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 AInventoryBuilding::AInventoryBuilding()
 {
 	InventoryComp = CreateDefaultSubobject<URInventoryComponent>("InventoryComponent");
-	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>("StaticMeshComponent");
-	RootComponent = MeshComp;
 	bReplicates = true;
 	SetReplicatingMovement(true);
 	bOpened = false;

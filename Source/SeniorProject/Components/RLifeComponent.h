@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "SeniorProject/Environment/Item.h"
 #include "RLifeComponent.generated.h"
 
 
@@ -18,6 +19,9 @@ public:
 
 	UFUNCTION()
 	void DecreaseHitPoints(int DecreasedAmount);
+
+	UFUNCTION(BlueprintCallable)
+	EDamageType GetEffectiveDamageType() {return EffectiveDamageType;}
 
 protected:
 	// Called when the game starts
@@ -34,4 +38,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int MaxHitPoints;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EDamageType EffectiveDamageType;
 };

@@ -29,10 +29,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	URLifeComponent* GetLifeComponent() {return LifeComp;}
-
-	UFUNCTION(BlueprintCallable)
-	EDamageType GetEffectiveDamageType() {return EffectiveDamageType;}
-
+	
 	UFUNCTION()
 	void DropLootItems();
 
@@ -42,10 +39,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* MeshComp;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EDamageType EffectiveDamageType;
-
+	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	TArray<TSubclassOf<AItem>> LootItemClasses;
 };

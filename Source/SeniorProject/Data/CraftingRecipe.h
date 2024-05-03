@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
-#include "Structs/FRecipeOfItem.h"
+#include "SeniorProject/Structs/FRecipeOfItem.h"
 #include "CraftingRecipe.generated.h"
 
 /**

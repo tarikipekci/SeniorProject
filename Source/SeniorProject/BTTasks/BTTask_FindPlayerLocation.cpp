@@ -3,12 +3,12 @@
 
 #include "BTTask_FindPlayerLocation.h"
 
-#include "Animal.h"
-#include "Animal_AIController.h"
 #include "NavigationSystem.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
+#include "SeniorProject/Characters/Animal.h"
+#include "SeniorProject/Controllers/Animal_AIController.h"
 
 UBTTask_FindPlayerLocation::UBTTask_FindPlayerLocation(FObjectInitializer const& ObjectInitializer)
 {

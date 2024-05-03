@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "Animal.generated.h"
 
+class APatrolPath;
+class URLifeComponent;
 class UBehaviorTree;
 
 UCLASS()
@@ -40,6 +42,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	float GetGallopSpeed() const {return GallopSpeed;}
 
+	UFUNCTION(BlueprintCallable)
+	URLifeComponent* GetLifeComponent() const {return LifeComp;}
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCapsuleComponent* CapsuleCollision;
@@ -53,4 +58,11 @@ private:
 
 	UPROPERTY()
 	float GallopSpeed;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="AI",meta=(AllowPrivateAccess="true"))
+	APatrolPath* PatrolPath;
+
+protected:
+	UPROPERTY(VisibleAnywhere)
+	URLifeComponent* LifeComp;
 };
