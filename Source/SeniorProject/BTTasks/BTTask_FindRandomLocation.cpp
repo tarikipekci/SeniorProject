@@ -10,7 +10,8 @@
 
 class AAnimal;
 
-UBTTask_FindRandomLocation::UBTTask_FindRandomLocation(FObjectInitializer const& ObjectInitializer)
+UBTTask_FindRandomLocation::UBTTask_FindRandomLocation(FObjectInitializer const& ObjectInitializer) :
+	UBTTask_BlackboardBase(ObjectInitializer)
 {
 	SearchRadius = 1500.f;
 	NodeName = "Find Random Location In NavMesh";
@@ -23,10 +24,9 @@ EBTNodeResult::Type UBTTask_FindRandomLocation::ExecuteTask(UBehaviorTreeCompone
 	{
 		if(AAnimal* const Animal = Cast<AAnimal>(AnimalController->GetPawn()))
 		{
-            // Obtain animal location to use as an origin
-            auto const Origin = Animal->GetActorLocation();
-            Animal->ChangeMovementSpeed(Animal->GetWalkSpeed());
-			
+			// Obtain animal location to use as an origin
+			auto const Origin = Animal->GetActorLocation();
+
 			//Get the navigation system and generate a random location
 			if(auto* const NavSystem = UNavigationSystemV1::GetCurrent(GetWorld()))
 			{

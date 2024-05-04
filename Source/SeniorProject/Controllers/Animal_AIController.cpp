@@ -57,5 +57,6 @@ void AAnimal_AIController::OnTargetDetected(AActor* Actor, FAIStimulus const Sti
 	if(auto* const Player = Cast<ASeniorProjectCharacter>(Actor))
 	{
 		GetBlackboardComponent()->SetValueAsBool("CanSeePlayer", Stimulus.WasSuccessfullySensed());
+		DetectedPlayer = Player;
 	}
 }

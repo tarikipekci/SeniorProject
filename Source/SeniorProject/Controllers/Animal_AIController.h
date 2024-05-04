@@ -6,6 +6,7 @@
 #include "AIController.h"
 #include "Animal_AIController.generated.h"
 
+class ASeniorProjectCharacter;
 struct FAIStimulus;
 /**
  * 
@@ -18,11 +19,16 @@ class SENIORPROJECT_API AAnimal_AIController : public AAIController
 public:
 	explicit AAnimal_AIController(FObjectInitializer const& ObjectInitializer);
 
+	ASeniorProjectCharacter* GetDetectedPlayer() const {return DetectedPlayer;}
+
 protected:
 	virtual void OnPossess(APawn* InPawn) override;
 
 private:
 	class UAISenseConfig_Sight* SightConfig;
+
+	UPROPERTY()
+	ASeniorProjectCharacter* DetectedPlayer;
 
 	void SetupPerceptionSystem();
 

@@ -5,20 +5,23 @@
 
 #include "NavigationSystem.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "GameFramework/Character.h"
-#include "Kismet/GameplayStatics.h"
 #include "SeniorProject/Characters/Animal.h"
+#include "SeniorProject/Characters/SeniorProjectCharacter.h"
 #include "SeniorProject/Controllers/Animal_AIController.h"
 
-UBTTask_FindPlayerLocation::UBTTask_FindPlayerLocation(FObjectInitializer const& ObjectInitializer)
+UBTTask_FindPlayerLocation::UBTTask_FindPlayerLocation(FObjectInitializer const& ObjectInitializer) :
+	UBTTask_BlackboardBase(ObjectInitializer)
 {
 	NodeName = TEXT("Find Player Location");
 }
 
 EBTNodeResult::Type UBTTask_FindPlayerLocation::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
+	auto* const AnimalController = Cast<AAnimal_AIController>(OwnerComp.GetAIOwner());
+	auto* const Animal = Cast<AAnimal>(AnimalController->GetPawn());
+
 	//Get Player Character
-	if(auto* const Player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
+	if(auto* const Player = AnimalController->GetDetectedPlayer())
 	{
 		//Get player location to use as an origin
 		auto const PlayerLocation = Player->GetActorLocation();
@@ -41,9 +44,6 @@ EBTNodeResult::Type UBTTask_FindPlayerLocation::ExecuteTask(UBehaviorTreeCompone
 		else
 		{
 			OwnerComp.GetBlackboardComponent()->SetValueAsVector(GetSelectedBlackboardKey(), PlayerLocation);
-			auto* const AnimalController = Cast<AAnimal_AIController>(OwnerComp.GetAIOwner());
-			auto* const Animal = Cast<AAnimal>(AnimalController->GetPawn());
-			Animal->ChangeMovementSpeed(Animal->GetGallopSpeed());
 			FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 			return EBTNodeResult::Succeeded;
 		}

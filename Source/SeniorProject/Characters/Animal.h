@@ -45,6 +45,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	URLifeComponent* GetLifeComponent() const {return LifeComp;}
 
+	UFUNCTION(BlueprintCallable)
+	APatrolPath* GetPatrolPath() const {return PatrolPath;}
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCapsuleComponent* CapsuleCollision;
