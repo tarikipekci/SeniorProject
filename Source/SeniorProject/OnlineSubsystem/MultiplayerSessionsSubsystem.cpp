@@ -107,7 +107,7 @@ void UMultiplayerSessionsSubsystem::FindServer(FString ServerName)
 		IsLAN = true;
 	}
 	SessionSearch->bIsLanQuery = IsLAN;
-	SessionSearch->MaxSearchResults = 9999;
+	SessionSearch->MaxSearchResults = 999;
 	SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
 
 	ServerNameToFind = ServerName;
