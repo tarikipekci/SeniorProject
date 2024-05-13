@@ -60,6 +60,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	const TArray<FItemData>& GetInventoryItems() const { return InventoryItems; }
 
+	UFUNCTION(BlueprintCallable)
+	int GetInventoryMaxSlotSize() const {return InventoryMaxSlotSize;}
+
 	UFUNCTION()
 	void InitializeInventory();
 
