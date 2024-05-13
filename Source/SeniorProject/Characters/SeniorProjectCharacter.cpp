@@ -202,23 +202,47 @@ void ASeniorProjectCharacter::Look(const FInputActionValue& Value)
 
 void ASeniorProjectCharacter::StartSprinting()
 {
-	if(PlayerStatComp->GetStamina() > 0 && GetVelocity().Size())
+	if(HasAuthority())
 	{
-		bIsSprinting = true;
-		ChangeMovementSpeed();
-		PlayerStatComp->ControlSprintingTimer(true);
+		if(PlayerStatComp->GetStamina() > 0 && GetVelocity().Size())
+		{
+			bIsSprinting = true;
+			ChangeMovementSpeed();
+			PlayerStatComp->ControlSprintingTimer(true);
+		}
+		else if(PlayerStatComp->GetStamina() <= 0.0f)
+		{
+			PlayerStatComp->ControlSprintingTimer(false);
+		}
 	}
-	else if(PlayerStatComp->GetStamina() <= 0.0f)
+	else
 	{
-		PlayerStatComp->ControlSprintingTimer(false);
+		Server_StartSprinting();
 	}
+}
+
+void ASeniorProjectCharacter::Server_StartSprinting_Implementation()
+{
+	StartSprinting();
 }
 
 void ASeniorProjectCharacter::StopSprinting()
 {
-	bIsSprinting = false;
-	ChangeMovementSpeed();
-	PlayerStatComp->ControlSprintingTimer(false);
+	if(HasAuthority())
+	{
+		bIsSprinting = false;
+		ChangeMovementSpeed();
+		PlayerStatComp->ControlSprintingTimer(false);
+	}
+	else
+	{
+		Server_StopSprinting();
+	}
+}
+
+void ASeniorProjectCharacter::Server_StopSprinting_Implementation()
+{
+	StopSprinting();
 }
 
 void ASeniorProjectCharacter::HandleSprinting()

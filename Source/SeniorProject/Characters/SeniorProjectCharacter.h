@@ -111,9 +111,15 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void StartSprinting();
+
+	UFUNCTION(Server,Reliable)
+	void Server_StartSprinting();
 	
 	UFUNCTION(BlueprintCallable)
 	void StopSprinting();
+
+	UFUNCTION(Server,Reliable)
+	void Server_StopSprinting();
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void ChangeMovementSpeed();
