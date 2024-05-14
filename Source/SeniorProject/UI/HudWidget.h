@@ -42,6 +42,9 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, meta=(BindWidget))
 	UWidgetSwitcher* WS_TabPanel;
+
+	UPROPERTY(BlueprintReadWrite, meta=(BindWidget))
+	UUserWidget* WBP_EscMenu;
 	
 	UPROPERTY(BlueprintReadWrite, meta=(BindWidget))
 	UButton* CraftingButton;

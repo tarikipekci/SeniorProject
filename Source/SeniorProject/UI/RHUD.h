@@ -22,6 +22,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void ToggleVisibilityOfInventory(APlayerController* PlayerController);
+
+	UFUNCTION(BlueprintCallable)
+	void ToggleEscMenu(APlayerController* PlayerController);
 	
 	virtual void BeginPlay() override;
 
@@ -46,6 +49,9 @@ public:
 	
 	UPROPERTY(BlueprintReadWrite)
 	UButton* InventoryButton;
+
+	UPROPERTY(BlueprintReadWrite)
+	UUserWidget* EscMenu;
 
 	UPROPERTY(BlueprintReadWrite)
 	UButton* CraftingButton;

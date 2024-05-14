@@ -115,6 +115,19 @@ void UMultiplayerSessionsSubsystem::FindServer(FString ServerName)
 	SessionInterface->FindSessions(0, SessionSearch.ToSharedRef());
 }
 
+void UMultiplayerSessionsSubsystem::QuitSession(FString ServerName)
+{
+	IOnlineSubsystem* OnlineSubsystem = IOnlineSubsystem::Get();
+	if(OnlineSubsystem)
+	{
+		SessionInterface = OnlineSubsystem->GetSessionInterface();
+		if(SessionInterface.IsValid())
+		{
+			SessionInterface->DestroySession(MySessionName);
+		}
+	}
+}
+
 void UMultiplayerSessionsSubsystem::OnCreateSessionComplete(FName SessionName, bool WasSuccessful)
 {
 	PrintString(FString::Printf(TEXT("OnCreateSessionComplete: %d "), WasSuccessful));

@@ -21,7 +21,7 @@ void ARHUD::CreateHudWidgets()
 
 void ARHUD::ToggleVisibilityOfInventory(APlayerController* PlayerController)
 {
-	if(PlayerController)
+	if(PlayerController && !EscMenu->IsVisible())
 	{
 		if(InteractableInventory && PlayerInventoryWidget && PlayerInventoryWidget->IsVisible())
 		{
@@ -53,6 +53,45 @@ void ARHUD::ToggleVisibilityOfInventory(APlayerController* PlayerController)
 			CraftingButton->SetVisibility(ESlateVisibility::Visible);
 			CraftingMenu->SetVisibility(ESlateVisibility::Visible);
 			TabPanel->SetActiveWidgetIndex(0);
+		}
+	}
+}
+
+void ARHUD::ToggleEscMenu(APlayerController* PlayerController)
+{
+	if(EscMenu->IsVisible())
+	{
+		FInputModeGameOnly InputModeGameOnly;
+		PlayerController->SetInputMode(InputModeGameOnly);
+		PlayerController->SetShowMouseCursor(false);
+		PlayerController->SetIgnoreMoveInput(false);
+		PlayerController->SetIgnoreLookInput(false);
+		ToggleVisibilityOfInventory(PlayerController);
+		EscMenu->SetVisibility(ESlateVisibility::Hidden);
+		InteractionWidget->SetRenderOpacity(1);
+	}
+	else
+	{
+		if(PlayerInventoryWidget->IsVisible())
+		{
+			ToggleVisibilityOfInventory(PlayerController);
+			FInputModeGameAndUI InputModeGameAndUIOnly;
+			PlayerController->SetInputMode(InputModeGameAndUIOnly);
+			PlayerController->SetIgnoreMoveInput(true);
+			PlayerController->SetIgnoreLookInput(true);
+			PlayerController->SetShowMouseCursor(true);
+			InteractionWidget->SetRenderOpacity(0);
+			EscMenu->SetVisibility(ESlateVisibility::Visible);
+		}
+		else
+		{
+			FInputModeGameAndUI InputModeGameAndUIOnly;
+			PlayerController->SetInputMode(InputModeGameAndUIOnly);
+			PlayerController->SetIgnoreMoveInput(true);
+			PlayerController->SetIgnoreLookInput(true);
+			PlayerController->SetShowMouseCursor(true);
+			InteractionWidget->SetRenderOpacity(0);
+			EscMenu->SetVisibility(ESlateVisibility::Visible);
 		}
 	}
 }

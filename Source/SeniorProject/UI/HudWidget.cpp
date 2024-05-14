@@ -19,4 +19,5 @@ void UHudWidget::SetHudWidgets(ARHUD* Hud)
 	Hud->CraftingButton = CraftingButton;
 	Hud->CraftingMenu = WBP_CraftingMenu;
 	Hud->TabPanel = WS_TabPanel;
+	Hud->EscMenu = WBP_EscMenu;
 }

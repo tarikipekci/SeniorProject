@@ -35,6 +35,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void FindServer(FString ServerName);
 
+	UFUNCTION(BlueprintCallable)
+	void QuitSession(FString ServerName);
+
 	void OnCreateSessionComplete(FName SessionName, bool WasSuccessful);
 	void OnDestroySessionComplete(FName SessionName, bool WasSuccessful);
 	void OnFindSessionsComplete(bool WasSuccessful);
