@@ -10,7 +10,7 @@
 // Sets default values
 AAnimal::AAnimal()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	CapsuleCollision = CreateDefaultSubobject<UCapsuleComponent>("CapsuleCollision");
 	CapsuleCollision->SetRelativeLocation(FVector::ZeroVector);
@@ -31,18 +31,33 @@ void AAnimal::BeginPlay()
 void AAnimal::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 // Called to bind functionality to input
 void AAnimal::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+}
 
+int AAnimal::MeleeAttack_Implementation()
+{
+	NetMulticast_PlayAttackAnimation();
+	return 0;
+}
+
+void AAnimal::NetMulticast_PlayAttackAnimation_Implementation()
+{
+	if(GetVelocity().Size() > 0)
+	{
+		PlayAnimMontage(UpperBodyMontage);
+	}
+	else
+	{
+		PlayAnimMontage(NormalMontage);
+	}
 }
 
 void AAnimal::ChangeMovementSpeed(float NewSpeed)
 {
 	GetCharacterMovement()->MaxWalkSpeed = NewSpeed;
 }
-

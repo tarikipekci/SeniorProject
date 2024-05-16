@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CombatInterface.h"
 #include "GameFramework/Character.h"
 #include "Animal.generated.h"
 
@@ -11,7 +12,7 @@ class URLifeComponent;
 class UBehaviorTree;
 
 UCLASS()
-class SENIORPROJECT_API AAnimal : public ACharacter
+class SENIORPROJECT_API AAnimal : public ACharacter, public ICombatInterface
 {
 	GENERATED_BODY()
 
@@ -48,6 +49,15 @@ public:
 	UFUNCTION(BlueprintCallable)
 	APatrolPath* GetPatrolPath() const {return PatrolPath;}
 
+	UAnimMontage* GetUpperBodyMontage() const {return UpperBodyMontage;}
+
+	UAnimMontage* GetNormalMontage() const {return NormalMontage;}
+
+	virtual int MeleeAttack_Implementation() override;
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticast_PlayAttackAnimation();
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCapsuleComponent* CapsuleCollision;
@@ -64,6 +74,12 @@ private:
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="AI",meta=(AllowPrivateAccess="true"))
 	APatrolPath* PatrolPath;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation", meta=(AllowPrivateAccess="true"))
+	UAnimMontage* UpperBodyMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation", meta=(AllowPrivateAccess="true"))
+	UAnimMontage* NormalMontage;
 
 protected:
 	UPROPERTY(VisibleAnywhere)
