@@ -4,36 +4,31 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimNotifies/AnimNotifyState.h"
-#include "AttackAnimNotifyState.generated.h"
+#include "AIAttackAnimNotifyState.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAINotifyBegin);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAINotifyTick);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAINotifyEnd);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAIAttackBegin);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAIOnAttack);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAIAttackEnd);
 
 UCLASS()
-class SENIORPROJECT_API UAttackAnimNotifyState : public UAnimNotifyState
+class SENIORPROJECT_API UAIAttackAnimNotifyState : public UAnimNotifyState
 {
 	GENERATED_BODY()
 
 public:
-	UFUNCTION()
-	virtual void NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float FrameDeltaTime,
-	                        const FAnimNotifyEventReference& EventReference) override;
-
-	UFUNCTION()
 	virtual void NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration,
 	                         const FAnimNotifyEventReference& EventReference) override;
-
-	UFUNCTION()
+	virtual void NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float FrameDeltaTime,
+	                        const FAnimNotifyEventReference& EventReference) override;
 	virtual void NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
 	                       const FAnimNotifyEventReference& EventReference) override;
 
 	UPROPERTY(BlueprintAssignable)
-	FOnAINotifyBegin OnNotifyBegin;
+	FAIAttackBegin AIAttackBegin;
 
 	UPROPERTY(BlueprintAssignable)
-	FOnAINotifyTick OnNotifyTick;
+	FAIOnAttack AIOnAttack;
 
 	UPROPERTY(BlueprintAssignable)
-	FOnAINotifyEnd OnNotifyEnd;
+	FAIAttackEnd AIAttackEnd;
 };

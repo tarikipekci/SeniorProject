@@ -23,16 +23,14 @@ public:
 	UFUNCTION(BlueprintCallable)
 	EDamageType GetEffectiveDamageType() {return EffectiveDamageType;}
 
+	UFUNCTION()
+	void DropLootItems();
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
 protected:
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int CurrentHitPoints;
 
@@ -41,4 +39,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EDamageType EffectiveDamageType;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	TArray<TSubclassOf<AItem>> LootItemClasses;
 };

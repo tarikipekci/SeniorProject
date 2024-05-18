@@ -3,17 +3,10 @@
 
 #include "RLifeComponent.h"
 
-#include "SeniorProject/Environment/LootableActor.h"
-
 // Sets default values for this component's properties
 URLifeComponent::URLifeComponent()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
-	// ...
 }
-
 
 // Called when the game starts
 void URLifeComponent::BeginPlay()
@@ -22,21 +15,12 @@ void URLifeComponent::BeginPlay()
 	CurrentHitPoints = MaxHitPoints;
 }
 
-
-// Called every frame
-void URLifeComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
-}
-
 void URLifeComponent::DecreaseHitPoints(int DecreasedAmount)
 {
 	if(CurrentHitPoints - DecreasedAmount <= 0)
 	{
 		GetOwner()->Destroy();
-		Cast<ALootableActor>(GetOwner())->DropLootItems();
+		DropLootItems();
 	}
 	else
 	{
@@ -44,3 +28,29 @@ void URLifeComponent::DecreaseHitPoints(int DecreasedAmount)
 	}
 }
 
+void URLifeComponent::DropLootItems()
+{
+	if(GetOwner()->HasAuthority())
+	{
+		for(auto ItemClass : LootItemClasses)
+		{
+			int RandomNumberX = FMath::RandRange(0, 200);
+			int RandomNumberY = FMath::RandRange(0, 200);
+			FVector RandomVector = FVector(RandomNumberX, RandomNumberY, 500);
+			FVector SpawnVector = GetOwner()->GetActorLocation() + RandomVector;
+
+			FVector Start = SpawnVector;
+			FVector End = SpawnVector - FVector(0, 0, 1000.0f);
+
+			FHitResult HitResult;
+			FCollisionQueryParams CollisionParams;
+			CollisionParams.AddIgnoredActor(GetOwner());
+
+			if(GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, CollisionParams))
+			{
+				SpawnVector = HitResult.Location;
+			}
+			AItem* DroppedLoot = GetWorld()->SpawnActor<AItem>(ItemClass, SpawnVector, FRotator(0, 0, 0));
+		}
+	}
+}

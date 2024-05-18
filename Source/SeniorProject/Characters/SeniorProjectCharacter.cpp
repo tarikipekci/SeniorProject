@@ -75,6 +75,7 @@ ASeniorProjectCharacter::ASeniorProjectCharacter()
 
 	InteractComp->SetupAttachment(RootComponent);
 	bIsSprinting = false;
+	bIsDead = false;
 	StaminaDecrementTimerDuration = 0.1f;
 	JumpStaminaCost = 20.0f;
 	RespawnDuration = 5.0f;
@@ -380,7 +381,7 @@ void ASeniorProjectCharacter::Die()
 {
 	if(GetLocalRole() == ROLE_Authority)
 	{
-		//InventoryComp->DropAllInventoryItems();
+		bIsDead = true;
 		Multicast_Die();
 		//Start destroy timer to remove player actor from world
 		GetWorld()->GetTimerManager().SetTimer(DestroyHandle, this, &ASeniorProjectCharacter::CallDestroy,

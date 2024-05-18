@@ -30,8 +30,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	URLifeComponent* GetLifeComponent() {return LifeComp;}
 	
-	UFUNCTION()
-	void DropLootItems();
 
 protected:
 	UPROPERTY(VisibleAnywhere)
@@ -39,7 +37,4 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* MeshComp;
-	
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	TArray<TSubclassOf<AItem>> LootItemClasses;
 };

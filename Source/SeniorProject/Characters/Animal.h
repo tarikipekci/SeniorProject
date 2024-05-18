@@ -7,6 +7,7 @@
 #include "GameFramework/Character.h"
 #include "Animal.generated.h"
 
+class UBoxComponent;
 class APatrolPath;
 class URLifeComponent;
 class UBehaviorTree;
@@ -28,35 +29,50 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="AI", meta=(AllowPrivateAccess = "true"))
 	UBehaviorTree* Tree;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UBehaviorTree* GetBehaviourTree() const {return Tree;}
+	UBehaviorTree* GetBehaviourTree() const { return Tree; }
 
 	UFUNCTION(BlueprintCallable)
-	float GetWalkSpeed() const {return WalkSpeed;}
+	float GetWalkSpeed() const { return WalkSpeed; }
 
 	UFUNCTION(BlueprintCallable)
-	float GetGallopSpeed() const {return GallopSpeed;}
+	float GetGallopSpeed() const { return GallopSpeed; }
 
 	UFUNCTION(BlueprintCallable)
-	URLifeComponent* GetLifeComponent() const {return LifeComp;}
+	URLifeComponent* GetLifeComponent() const { return LifeComp; }
 
 	UFUNCTION(BlueprintCallable)
-	APatrolPath* GetPatrolPath() const {return PatrolPath;}
+	APatrolPath* GetPatrolPath() const { return PatrolPath; }
 
-	UAnimMontage* GetUpperBodyMontage() const {return UpperBodyMontage;}
+	UAnimMontage* GetUpperBodyMontage() const { return UpperBodyMontage; }
 
-	UAnimMontage* GetNormalMontage() const {return NormalMontage;}
+	UAnimMontage* GetNormalMontage() const { return NormalMontage; }
 
 	virtual int MeleeAttack_Implementation() override;
-	
+
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulticast_PlayAttackAnimation();
+	
+	UFUNCTION()
+	void InitAnimations();
+
+	UFUNCTION(Server,Reliable)
+	void Server_InitAnimations();
+
+	UFUNCTION()
+	void OnAnimationBegin();
+	
+	UFUNCTION()
+	void OnAnimation();
+
+	UFUNCTION()
+	void OnAnimationFinish();
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -72,7 +88,15 @@ private:
 	UPROPERTY()
 	float GallopSpeed;
 
-	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="AI",meta=(AllowPrivateAccess="true"))
+	UPROPERTY()
+	float DamageAmount;
+
+	UPROPERTY()
+	float MouthCollisionBoxExtentSize;
+
+	bool bIsAnimPlayed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="AI", meta=(AllowPrivateAccess="true"))
 	APatrolPath* PatrolPath;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation", meta=(AllowPrivateAccess="true"))
@@ -84,4 +108,7 @@ private:
 protected:
 	UPROPERTY(VisibleAnywhere)
 	URLifeComponent* LifeComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Collision", meta=(AllowPrivateAccess="true"))
+	UBoxComponent* MouthCollision;
 };

@@ -6,6 +6,8 @@
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "SeniorProject/Characters/Animal.h"
+#include "SeniorProject/Characters/SeniorProjectCharacter.h"
+#include "SeniorProject/Controllers/Animal_AIController.h"
 
 UBTTask_MeleeAttack::UBTTask_MeleeAttack()
 {
@@ -21,14 +23,21 @@ EBTNodeResult::Type UBTTask_MeleeAttack::ExecuteTask(UBehaviorTreeComponent& Own
 		return EBTNodeResult::Succeeded;
 	}
 
-	auto const* const AnimalController = OwnerComp.GetAIOwner();
+	auto const* const AnimalController = Cast<AAnimal_AIController>(OwnerComp.GetAIOwner());
 	auto* const Animal = Cast<AAnimal>(AnimalController->GetPawn());
 
 	if(auto* const CombatInterface = Cast<ICombatInterface>(Animal))
 	{
 		if(MontageHasFinished(Animal))
 		{
-			CombatInterface->Execute_MeleeAttack(Animal);
+			if(AnimalController->GetDetectedPlayer()->GetIsDead() == false)
+			{
+				CombatInterface->Execute_MeleeAttack(Animal);
+			}
+			else
+			{
+				OwnerComp.GetBlackboardComponent()->SetValueAsBool("CanSeePlayer",false);
+			}
 		}
 	}
 	FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);

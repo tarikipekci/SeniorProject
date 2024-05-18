@@ -273,6 +273,12 @@ void URPlayerStatComponent::DecreaseHealth(float Value)
 	else if(GetOwnerRole() == ROLE_Authority)
 	{
 		Health -= Value;
+
+		if(Health <= 0)
+		{
+			ASeniorProjectCharacter* OwnerPlayer = Cast<ASeniorProjectCharacter>(GetOwner());
+			OwnerPlayer->Die();
+		}
 	}
 }
 

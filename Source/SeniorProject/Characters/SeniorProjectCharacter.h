@@ -50,6 +50,12 @@ class ASeniorProjectCharacter : public ACharacter
 
 public:
 	ASeniorProjectCharacter();
+
+	UFUNCTION(BlueprintCallable)
+	void Die();
+	
+	UFUNCTION(BlueprintCallable)
+	bool GetIsDead() const {return bIsDead;}
 	
 	//Animations
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -93,6 +99,9 @@ protected:
 	UPROPERTY(BlueprintReadWrite)
 	float SprintSpeed;
 
+	UPROPERTY(BlueprintReadWrite)
+	bool bIsDead;
+
 	//Timers
 	FTimerHandle SprintingHandle;
 	FTimerHandle DestroyHandle;
@@ -129,10 +138,7 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void AttemptJump();
-
-	UFUNCTION(BlueprintCallable)
-	void Die();
-
+	
 	UFUNCTION(Server, Reliable)
 	void Server_UsePickup(AItem* Item);
 
