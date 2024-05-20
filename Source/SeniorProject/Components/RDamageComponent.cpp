@@ -11,11 +11,6 @@
 // Sets default values for this component's properties
 URDamageComponent::URDamageComponent()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
 }
 
 
@@ -26,16 +21,6 @@ void URDamageComponent::BeginPlay()
 
 	InitAnimations();
 	bIsAnimPlayed = false;
-}
-
-
-// Called every frame
-void URDamageComponent::TickComponent(float DeltaTime, ELevelTick TickType,
-                                      FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
 }
 
 void URDamageComponent::InitAnimations()
@@ -82,6 +67,9 @@ void URDamageComponent::OnAnimation()
 				URLifeComponent* LifeComp = Cast<URLifeComponent>(OverlappedActor->FindComponentByClass<URLifeComponent>());
 				if(DamageType == LifeComp->GetEffectiveDamageType())
 				{
+					AItem* UsedTool = Cast<AItem>(GetOwner());
+					ASeniorProjectCharacter* DamagingPlayer = UsedTool->ItemData.PlayerEquipping;
+					LifeComp->SetDamagingPlayer(DamagingPlayer);
 					LifeComp->DecreaseHitPoints(DamageAmount);
 				}
 				bIsAnimPlayed = true;

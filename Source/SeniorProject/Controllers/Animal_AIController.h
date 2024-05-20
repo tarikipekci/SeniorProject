@@ -21,6 +21,8 @@ public:
 
 	ASeniorProjectCharacter* GetDetectedPlayer() const {return DetectedPlayer;}
 
+	void SetDetectedPlayer(ASeniorProjectCharacter* Player) {DetectedPlayer = Player;}
+
 protected:
 	virtual void OnPossess(APawn* InPawn) override;
 

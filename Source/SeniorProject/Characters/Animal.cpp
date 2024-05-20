@@ -13,8 +13,6 @@
 // Sets default values
 AAnimal::AAnimal()
 {
-	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
 	CapsuleCollision = CreateDefaultSubobject<UCapsuleComponent>("CapsuleCollision");
 	CapsuleCollision->SetRelativeLocation(FVector::ZeroVector);
 	CapsuleCollision->SetupAttachment(RootComponent);
@@ -30,7 +28,7 @@ AAnimal::AAnimal()
 void AAnimal::BeginPlay()
 {
 	Super::BeginPlay();
-	ChangeMovementSpeed(WalkSpeed);
+	Server_ChangeMovementSpeed(WalkSpeed);
 	if(MouthCollision)
 	{
 		MouthCollision->SetBoxExtent(FVector(MouthCollisionBoxExtentSize, MouthCollisionBoxExtentSize,
@@ -44,28 +42,24 @@ void AAnimal::BeginPlay()
 		};
 		MouthCollision->AttachToComponent(GetMesh(), Rules, "Mouth");
 	}
-	InitAnimations();
-}
-
-// Called every frame
-void AAnimal::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
+	Server_InitAnimations();
 }
 
 // Called to bind functionality to input
 void AAnimal::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	if(GetNetMode() == NM_ListenServer)
+	{
+		Super::SetupPlayerInputComponent(PlayerInputComponent);
+	}
 }
 
-int AAnimal::MeleeAttack_Implementation()
+void AAnimal::Server_MeleeAttack_Implementation()
 {
 	NetMulticast_PlayAttackAnimation();
-	return 0;
 }
 
-void AAnimal::InitAnimations()
+void AAnimal::Server_InitAnimations_Implementation()
 {
 	if(HasAuthority())
 	{
@@ -77,34 +71,30 @@ void AAnimal::InitAnimations()
 			{
 				if(const auto AttackNotify = Cast<UAIAttackAnimNotifyState>(EventNotify.NotifyStateClass))
 				{
-					AttackNotify->AIAttackBegin.AddDynamic(this, &AAnimal::OnAnimationBegin);
-					AttackNotify->AIOnAttack.AddDynamic(this, &AAnimal::OnAnimation);
-					AttackNotify->AIAttackEnd.AddDynamic(this, &AAnimal::OnAnimationFinish);
+					AttackNotify->AIAttackBegin.AddDynamic(this, &AAnimal::Server_OnAnimationBegin);
+					AttackNotify->AIOnAttack.AddDynamic(this, &AAnimal::Server_OnAnimation);
+					AttackNotify->AIAttackEnd.AddDynamic(this, &AAnimal::Server_OnAnimationFinish);
 				}
 			}
 			for(auto EventNotify : NotifyEventsUpper)
 			{
 				if(const auto AttackNotify = Cast<UAIAttackAnimNotifyState>(EventNotify.NotifyStateClass))
 				{
-					AttackNotify->AIAttackBegin.AddDynamic(this, &AAnimal::OnAnimationBegin);
-					AttackNotify->AIOnAttack.AddDynamic(this, &AAnimal::OnAnimation);
-					AttackNotify->AIAttackEnd.AddDynamic(this, &AAnimal::OnAnimationFinish);
+					AttackNotify->AIAttackBegin.AddDynamic(this, &AAnimal::Server_OnAnimationBegin);
+					AttackNotify->AIOnAttack.AddDynamic(this, &AAnimal::Server_OnAnimation);
+					AttackNotify->AIAttackEnd.AddDynamic(this, &AAnimal::Server_OnAnimationFinish);
 				}
 			}
 		}
 	}
-	else
-	{
-		Server_InitAnimations();
-	}
 }
 
-void AAnimal::Server_InitAnimations_Implementation()
+void AAnimal::Server_ChangeMovementSpeed_Implementation(float NewSpeed)
 {
-	InitAnimations();
+	GetCharacterMovement()->MaxWalkSpeed = NewSpeed;
 }
 
-void AAnimal::OnAnimationBegin()
+void AAnimal::Server_OnAnimationBegin_Implementation()
 {
 	if(MouthCollision)
 	{
@@ -112,7 +102,7 @@ void AAnimal::OnAnimationBegin()
 	}
 }
 
-void AAnimal::OnAnimation()
+void AAnimal::Server_OnAnimation_Implementation()
 {
 	if(bIsAnimPlayed == false)
 	{
@@ -136,7 +126,7 @@ void AAnimal::OnAnimation()
 	}
 }
 
-void AAnimal::OnAnimationFinish()
+void AAnimal::Server_OnAnimationFinish_Implementation()
 {
 	bIsAnimPlayed = false;
 
@@ -156,9 +146,4 @@ void AAnimal::NetMulticast_PlayAttackAnimation_Implementation()
 	{
 		PlayAnimMontage(NormalMontage);
 	}
-}
-
-void AAnimal::ChangeMovementSpeed(float NewSpeed)
-{
-	GetCharacterMovement()->MaxWalkSpeed = NewSpeed;
 }

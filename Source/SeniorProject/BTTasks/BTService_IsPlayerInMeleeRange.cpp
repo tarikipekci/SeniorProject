@@ -1,8 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "BTService_IsPlayerInMeleeRange.h"
-
 #include "BehaviorTree/BlackboardComponent.h"
 #include "SeniorProject/Characters/Animal.h"
 #include "SeniorProject/Characters/SeniorProjectCharacter.h"
@@ -16,10 +12,39 @@ UBTService_IsPlayerInMeleeRange::UBTService_IsPlayerInMeleeRange()
 
 void UBTService_IsPlayerInMeleeRange::OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	auto const* const AnimalController = Cast<AAnimal_AIController>(OwnerComp.GetAIOwner());
-	auto const* const Animal = Cast<AAnimal>(AnimalController->GetPawn());
-	auto const* const Player = AnimalController->GetDetectedPlayer();
+	Super::OnBecomeRelevant(OwnerComp, NodeMemory);
 
-	OwnerComp.GetBlackboardComponent()->SetValueAsBool(GetSelectedBlackboardKey(),
-	                                                   Animal->GetDistanceTo(Player) <= MeleeRange);
+	if (OwnerComp.GetNetMode() == NM_Client)
+	{
+		return;
+	}
+
+	auto const* const AnimalController = Cast<AAnimal_AIController>(OwnerComp.GetAIOwner());
+	if (AnimalController == nullptr)
+	{
+		return;
+	}
+
+	auto const* const Animal = Cast<AAnimal>(AnimalController->GetPawn());
+	if (Animal == nullptr)
+	{
+		return;
+	}
+
+	auto const* const Player = AnimalController->GetDetectedPlayer();
+	if (Player == nullptr)
+	{
+		return;
+	}
+
+	auto* const BlackboardComp = OwnerComp.GetBlackboardComponent();
+	if (BlackboardComp == nullptr)
+	{
+		return;
+	}
+
+	float const DistanceToPlayer = Animal->GetDistanceTo(Player);
+	bool const bIsPlayerInMeleeRange = DistanceToPlayer <= MeleeRange;
+
+	BlackboardComp->SetValueAsBool(GetSelectedBlackboardKey(), bIsPlayerInMeleeRange);
 }

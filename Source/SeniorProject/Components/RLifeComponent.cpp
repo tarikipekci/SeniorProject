@@ -3,6 +3,10 @@
 
 #include "RLifeComponent.h"
 
+#include "BehaviorTree/BlackboardComponent.h"
+#include "SeniorProject/Characters/Animal.h"
+#include "SeniorProject/Controllers/Animal_AIController.h"
+
 // Sets default values for this component's properties
 URLifeComponent::URLifeComponent()
 {
@@ -25,6 +29,21 @@ void URLifeComponent::DecreaseHitPoints(int DecreasedAmount)
 	else
 	{
 		CurrentHitPoints -= DecreasedAmount;
+		Server_WarnEnemyAI();
+	}
+}
+
+void URLifeComponent::Server_WarnEnemyAI_Implementation()
+{
+	AAnimal* Animal = Cast<AAnimal>(GetOwner());
+	if(Animal)
+	{
+		AAnimal_AIController* AnimalController = Cast<AAnimal_AIController>(Animal->GetController());
+		if(AnimalController)
+		{
+			AnimalController->GetBlackboardComponent()->SetValueAsBool("CanSeePlayer", true);
+			AnimalController->SetDetectedPlayer(DamagingPlayer);
+		}
 	}
 }
 

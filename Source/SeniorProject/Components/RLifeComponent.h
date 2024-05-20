@@ -23,6 +23,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	EDamageType GetEffectiveDamageType() {return EffectiveDamageType;}
 
+	UFUNCTION(BlueprintCallable)
+	void SetDamagingPlayer(ASeniorProjectCharacter* Player) {DamagingPlayer = Player;}
+
+	UFUNCTION(Server,Reliable)
+	void Server_WarnEnemyAI();
+	
 	UFUNCTION()
 	void DropLootItems();
 
@@ -42,4 +48,7 @@ protected:
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	TArray<TSubclassOf<AItem>> LootItemClasses;
+
+	UPROPERTY()
+	ASeniorProjectCharacter* DamagingPlayer;
 };

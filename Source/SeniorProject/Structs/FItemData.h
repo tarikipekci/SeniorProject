@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "FItemData.generated.h"
+class ASeniorProjectCharacter;
 
 USTRUCT(BlueprintType)
 struct FItemData
@@ -27,5 +28,8 @@ struct FItemData
 
 	UPROPERTY(BlueprintReadWrite)
 	AItem* ItemActor;
+
+	UPROPERTY(BlueprintReadWrite)
+	ASeniorProjectCharacter* PlayerEquipping;
 };
 

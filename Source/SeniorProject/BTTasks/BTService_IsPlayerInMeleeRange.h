@@ -15,9 +15,9 @@ class SENIORPROJECT_API UBTService_IsPlayerInMeleeRange : public UBTService_Blac
 	GENERATED_BODY()
 public:
 	UBTService_IsPlayerInMeleeRange();
-	void OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
+	virtual void OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
-private:
+protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="AI", meta=(AllowPrivateAccess = "true"))
-	float MeleeRange = 2.5f;
+	float MeleeRange = 80.f;
 };

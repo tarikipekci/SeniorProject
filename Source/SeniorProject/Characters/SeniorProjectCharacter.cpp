@@ -309,6 +309,7 @@ void ASeniorProjectCharacter::EquipItem(AItem* EquippedItem)
 		const USkeletalMeshSocket* ToolSocket = SkeletalMesh->GetSocketByName(SocketName);
 		bCanFillWater = IsPlayerHoldingBottle();
 		EquippedItem->bIsEquipped = true;
+		EquippedItem->ItemData.PlayerEquipping = this;
 	}
 	else
 	{
@@ -336,6 +337,7 @@ void ASeniorProjectCharacter::UnEquipItem(AItem* UnequippedItem)
 		InventoryComp->SetEquippedItem(nullptr);
 		UnequippedItem->bIsEquipped = false;
 		bCanFillWater = false;
+		UnequippedItem->ItemData.PlayerEquipping = nullptr;
 	}
 	else
 	{

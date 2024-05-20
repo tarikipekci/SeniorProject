@@ -3,17 +3,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "CombatInterface.h"
 #include "GameFramework/Character.h"
 #include "Animal.generated.h"
 
+class ASeniorProjectCharacter;
 class UBoxComponent;
 class APatrolPath;
 class URLifeComponent;
 class UBehaviorTree;
 
 UCLASS()
-class SENIORPROJECT_API AAnimal : public ACharacter, public ICombatInterface
+class SENIORPROJECT_API AAnimal : public ACharacter 
 {
 	GENERATED_BODY()
 
@@ -30,9 +30,6 @@ protected:
 	UBehaviorTree* Tree;
 
 public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
@@ -53,33 +50,31 @@ public:
 	UAnimMontage* GetUpperBodyMontage() const { return UpperBodyMontage; }
 
 	UAnimMontage* GetNormalMontage() const { return NormalMontage; }
-
-	virtual int MeleeAttack_Implementation() override;
+	
+	UFUNCTION(Server,Reliable)
+	void Server_MeleeAttack();
 
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulticast_PlayAttackAnimation();
 	
-	UFUNCTION()
-	void InitAnimations();
-
 	UFUNCTION(Server,Reliable)
 	void Server_InitAnimations();
-
-	UFUNCTION()
-	void OnAnimationBegin();
 	
-	UFUNCTION()
-	void OnAnimation();
+	UFUNCTION(Server,Reliable)
+	void Server_OnAnimationBegin();
+	
+	UFUNCTION(Server,Reliable)
+	void Server_OnAnimation();
 
-	UFUNCTION()
-	void OnAnimationFinish();
+	UFUNCTION(Server,Reliable)
+	void Server_OnAnimationFinish();
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCapsuleComponent* CapsuleCollision;
-
-	UFUNCTION()
-	void ChangeMovementSpeed(float NewSpeed);
+	
+	UFUNCTION(Server,Reliable)
+	void Server_ChangeMovementSpeed(float NewSpeed);
 
 private:
 	UPROPERTY()
