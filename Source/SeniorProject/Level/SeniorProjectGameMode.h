@@ -13,6 +13,8 @@ class ASeniorProjectGameMode : public AGameModeBase
 
 public:
 	ASeniorProjectGameMode();
+
+	void ReSpawn(AController* Controller);
 };
 
 

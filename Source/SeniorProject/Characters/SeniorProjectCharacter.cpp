@@ -21,6 +21,7 @@
 #include "SeniorProject/Components/RLineTraceComponent.h"
 #include "SeniorProject/Components/RPlayerStatComponent.h"
 #include "SeniorProject/Environment/Item.h"
+#include "SeniorProject/Level/SeniorProjectGameMode.h"
 #include "SeniorProject/UI/HudWidget.h"
 #include "SeniorProject/UI/RHUD.h"
 
@@ -385,6 +386,11 @@ void ASeniorProjectCharacter::Die()
 	{
 		bIsDead = true;
 		Multicast_Die();
+		AGameModeBase* GM = GetWorld()->GetAuthGameMode();
+		if(ASeniorProjectGameMode* GameMode = Cast<ASeniorProjectGameMode>(GM))
+		{
+			GameMode->ReSpawn(GetController());
+		}
 		//Start destroy timer to remove player actor from world
 		GetWorld()->GetTimerManager().SetTimer(DestroyHandle, this, &ASeniorProjectCharacter::CallDestroy,
 		                                       RespawnDuration, false);
@@ -393,6 +399,7 @@ void ASeniorProjectCharacter::Die()
 
 void ASeniorProjectCharacter::Multicast_Die_Implementation()
 {
+	GetCapsuleComponent()->DestroyComponent();
 	this->GetCharacterMovement()->DisableMovement();
 	this->GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 	this->GetMesh()->SetAllBodiesSimulatePhysics(true);
