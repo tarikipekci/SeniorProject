@@ -18,7 +18,6 @@ class SENIORPROJECT_API ARHUD : public AHUD
 	GENERATED_BODY()
 public:
 	void CreateHudWidgets();
-	void SetHudWidgets(ARHUD* Hud);
 
 	UFUNCTION(BlueprintCallable)
 	void ToggleVisibilityOfInventory(APlayerController* PlayerController);
