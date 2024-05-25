@@ -99,12 +99,19 @@ protected:
 	UPROPERTY(BlueprintReadWrite)
 	float SprintSpeed;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite, Replicated)
 	bool bIsDead;
+
+	UPROPERTY(EditAnywhere, Category="Respawn")
+	TSubclassOf<AInventoryBuilding> DroppedBackpack;
 
 	//Timers
 	FTimerHandle SprintingHandle;
 	FTimerHandle DestroyHandle;
+
+	//Character Mesh
+	UPROPERTY(ReplicatedUsing = OnRep_CharacterMesh)
+    USkeletalMesh* CharacterMesh;
 
 private:
 	class UAIPerceptionStimuliSourceComponent* StimulusSource;
@@ -169,8 +176,20 @@ protected:
 	URInventoryComponent* GetInventoryComp() const { return InventoryComp; }
 
 public:
+	UFUNCTION()
+    void OnRep_CharacterMesh();
+
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator,
 	                         AActor* DamageCauser) override;
+
+	UFUNCTION(BlueprintCallable)
+	void SetCharacterMesh(USkeletalMesh* NewMesh);
+
+	UFUNCTION(Server, Reliable)
+	void Server_SetCharacterMesh(USkeletalMesh* NewMesh);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetCharacterMesh(USkeletalMesh* NewMesh);
 
 	UFUNCTION(BlueprintCallable)
 	void UsePickup(AItem* Item);
@@ -186,7 +205,7 @@ public:
 
 	UFUNCTION(Client,Reliable)
 	void Client_CloseInteractionWidget();
-
+	
 	UFUNCTION(Server, Reliable)
 	void Server_SetItemOwnership(AInventoryBuilding* SpawnedItem);
 

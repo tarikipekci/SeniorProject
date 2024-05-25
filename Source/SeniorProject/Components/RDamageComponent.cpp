@@ -4,6 +4,7 @@
 #include "RDamageComponent.h"
 
 #include "RLifeComponent.h"
+#include "RPlayerStatComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "SeniorProject/Environment/Item.h"
 #include "SeniorProject/Notifies/AttackAnimNotifyState.h"
@@ -58,26 +59,49 @@ void URDamageComponent::OnAnimation()
 	if(bIsAnimPlayed == false)
 	{
 		TArray<AActor*> OverlappingActors;
-		Cast<AItem>(GetOwner())->InteractCollision->GetOverlappingActors(OverlappingActors);
+		AItem* UsedTool = Cast<AItem>(GetOwner());
 
-		for(auto OverlappedActor : OverlappingActors)
+		if (UsedTool)
 		{
-			if(OverlappedActor->FindComponentByClass<URLifeComponent>())
+			UsedTool->InteractCollision->GetOverlappingActors(OverlappingActors);
+
+			ASeniorProjectCharacter* DamagingPlayer = UsedTool->ItemData.PlayerEquipping;
+
+			if (DamagingPlayer)
 			{
-				URLifeComponent* LifeComp = Cast<URLifeComponent>(OverlappedActor->FindComponentByClass<URLifeComponent>());
-				if(DamageType == LifeComp->GetEffectiveDamageType())
+				for (auto OverlappedActor : OverlappingActors)
 				{
-					AItem* UsedTool = Cast<AItem>(GetOwner());
-					ASeniorProjectCharacter* DamagingPlayer = UsedTool->ItemData.PlayerEquipping;
-					LifeComp->SetDamagingPlayer(DamagingPlayer);
-					LifeComp->DecreaseHitPoints(DamageAmount);
+					if (OverlappedActor == DamagingPlayer)
+					{
+						continue;
+					}
+
+					URLifeComponent* LifeComp = Cast<URLifeComponent>(OverlappedActor->FindComponentByClass<URLifeComponent>());
+					if (LifeComp)
+					{
+						if (DamageType == LifeComp->GetEffectiveDamageType())
+						{
+							LifeComp->SetDamagingPlayer(DamagingPlayer);
+							LifeComp->DecreaseHitPoints(DamageAmount);
+							bIsAnimPlayed = true;
+							break;
+						}
+					}
+					else if (ASeniorProjectCharacter* Player = Cast<ASeniorProjectCharacter>(OverlappedActor))
+					{
+						if (Player != DamagingPlayer) 
+						{
+							Player->PlayerStatComp->DecreaseHealth(DamageAmount);
+							bIsAnimPlayed = true;
+							break;
+						}
+					}
 				}
-				bIsAnimPlayed = true;
-				break;
 			}
 		}
 	}
 }
+
 
 void URDamageComponent::OnAnimationFinish()
 {

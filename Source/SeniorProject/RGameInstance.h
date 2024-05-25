@@ -18,8 +18,16 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetPlayerName(FString Name) { PlayerName = Name; }
 
+	UFUNCTION(BlueprintCallable)
+	USkeletalMesh* GetPlayerMesh() const { return SkeletalMeshOfPlayer; }
+
+	UFUNCTION(BlueprintCallable)
+	void SetPlayerMesh(USkeletalMesh* NewMesh) { SkeletalMeshOfPlayer = NewMesh; }
+
 	virtual void Init() override;
 	
 private:
 	FString PlayerName;
+
+	USkeletalMesh* SkeletalMeshOfPlayer;
 };

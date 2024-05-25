@@ -32,4 +32,10 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void SetIsOpened(bool bIsOpened) { bOpened = bIsOpened;}
+
+	UFUNCTION(BlueprintCallable)
+	ASeniorProjectCharacter* GetInteractedPlayer() const {return InteractedPlayer;}
+
+private:
+	ASeniorProjectCharacter* InteractedPlayer;
 };

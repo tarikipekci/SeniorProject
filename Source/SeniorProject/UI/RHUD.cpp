@@ -23,36 +23,40 @@ void ARHUD::ToggleVisibilityOfInventory(APlayerController* PlayerController)
 {
 	if(PlayerController && !EscMenu->IsVisible())
 	{
-		if(InteractableInventory && PlayerInventoryWidget && PlayerInventoryWidget->IsVisible())
+		if(ASeniorProjectCharacter* Player = Cast<ASeniorProjectCharacter>(PlayerController->GetPawn()))
 		{
-			if(InteractableInventory->IsVisible())
+			if(Player->GetIsDead())
+				return;
+			if(InteractableInventory && PlayerInventoryWidget && PlayerInventoryWidget->IsVisible())
 			{
-				ASeniorProjectCharacter* Player = Cast<ASeniorProjectCharacter>(PlayerController->GetPawn());
-				Player->Client_CloseInventory();
+				if(InteractableInventory->IsVisible())
+				{
+					Player->Client_CloseInventory();
+				}
+				FInputModeGameOnly InputModeGameOnly;
+				PlayerController->SetInputMode(InputModeGameOnly);
+				PlayerController->SetShowMouseCursor(false);
+				PlayerInventoryWidget->SetVisibility(ESlateVisibility::Hidden);
+				InventoryButton->SetVisibility(ESlateVisibility::Hidden);
+				CraftingButton->SetVisibility(ESlateVisibility::Hidden);
+				CraftingMenu->SetVisibility(ESlateVisibility::Hidden);
+				InteractionWidget->SetRenderOpacity(1);
+				PlayerController->SetIgnoreMoveInput(false);
+				PlayerController->SetIgnoreLookInput(false);
 			}
-			FInputModeGameOnly InputModeGameOnly;
-			PlayerController->SetInputMode(InputModeGameOnly);
-			PlayerController->SetShowMouseCursor(false);
-			PlayerInventoryWidget->SetVisibility(ESlateVisibility::Hidden);
-			InventoryButton->SetVisibility(ESlateVisibility::Hidden);
-			CraftingButton->SetVisibility(ESlateVisibility::Hidden);
-			CraftingMenu->SetVisibility(ESlateVisibility::Hidden);
-			InteractionWidget->SetRenderOpacity(1);
-			PlayerController->SetIgnoreMoveInput(false);
-			PlayerController->SetIgnoreLookInput(false);
-		}
-		else
-		{
-			FInputModeGameAndUI InputModeGameAndUIOnly;
-			PlayerController->SetInputMode(InputModeGameAndUIOnly);
-			PlayerController->SetIgnoreMoveInput(true);
-			PlayerController->SetIgnoreLookInput(true);
-			PlayerController->SetShowMouseCursor(true);
-			PlayerInventoryWidget->SetVisibility(ESlateVisibility::Visible);
-			InventoryButton->SetVisibility(ESlateVisibility::Visible);
-			CraftingButton->SetVisibility(ESlateVisibility::Visible);
-			CraftingMenu->SetVisibility(ESlateVisibility::Visible);
-			TabPanel->SetActiveWidgetIndex(0);
+			else
+			{
+				FInputModeGameAndUI InputModeGameAndUIOnly;
+				PlayerController->SetInputMode(InputModeGameAndUIOnly);
+				PlayerController->SetIgnoreMoveInput(true);
+				PlayerController->SetIgnoreLookInput(true);
+				PlayerController->SetShowMouseCursor(true);
+				PlayerInventoryWidget->SetVisibility(ESlateVisibility::Visible);
+				InventoryButton->SetVisibility(ESlateVisibility::Visible);
+				CraftingButton->SetVisibility(ESlateVisibility::Visible);
+				CraftingMenu->SetVisibility(ESlateVisibility::Visible);
+				TabPanel->SetActiveWidgetIndex(0);
+			}
 		}
 	}
 }

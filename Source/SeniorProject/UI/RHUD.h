@@ -24,7 +24,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void ToggleEscMenu(APlayerController* PlayerController);
-	
+
 	virtual void BeginPlay() override;
 
 public:

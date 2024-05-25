@@ -93,6 +93,9 @@ public:
 	UFUNCTION(Server,Reliable)
 	void Server_ChangeItemFromInventory(FItemData OldItemData, FItemData NewItemData);
 
+	UFUNCTION(Client, Reliable)
+	void Client_HideInventoryWidget(ASeniorProjectCharacter* OwningPlayer);
+
 private:
 	UPROPERTY()
 	ASeniorProjectCharacter* Player;

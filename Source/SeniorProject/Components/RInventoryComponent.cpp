@@ -7,6 +7,7 @@
 #include "Net/UnrealNetwork.h"
 #include "../Environment/Item.h"
 #include "SeniorProject/Building/InventoryBuilding.h"
+#include "SeniorProject/UI/RHUD.h"
 
 class ARHUD;
 // Sets default values for this component's properties
@@ -14,7 +15,7 @@ URInventoryComponent::URInventoryComponent()
 {
 	InventoryMaxSlotSize = 12;
 	DropRange = 100;
-	DropDepth = -200;
+	DropDepth = -500;
 }
 
 // Called when the game starts
@@ -142,6 +143,25 @@ void URInventoryComponent::Server_SwapItems_Implementation(URInventoryComponent*
 void URInventoryComponent::OnRep_InventoryUpdated()
 {
 	InventoryUpdated.Broadcast(InventoryItems);
+	if(AInventoryBuilding* Backpack = Cast<AInventoryBuilding>(GetOwner()))
+	{
+		if(Backpack->GetBuildingName() == "Backpack")
+		{
+			int EmptySlotCount = 0;
+			for(FItemData ItemData : Backpack->InventoryComp->InventoryItems)
+			{
+				if(!ItemData.ItemClass)
+				{
+					EmptySlotCount++;
+					if(EmptySlotCount == InventoryMaxSlotSize)
+					{
+						Client_HideInventoryWidget(Backpack->GetInteractedPlayer());
+						Backpack->Destroy();
+					}
+				}
+			}
+		}
+	}
 }
 
 void URInventoryComponent::DecreaseItemAmount(int SlotIndex, int Amount)
@@ -254,6 +274,26 @@ void URInventoryComponent::ChangeItemFromInventory(FItemData& OldItemData, FItem
 		Server_ChangeItemFromInventory(OldItemData, NewItemData);
 	}
 	OnRep_InventoryUpdated();
+}
+
+void URInventoryComponent::Client_HideInventoryWidget_Implementation(ASeniorProjectCharacter* OwningPlayer)
+{
+	APlayerController* PlayerController = Cast<APlayerController>(OwningPlayer->GetController());
+	if(PlayerController)
+	{
+		AHUD* Hud = PlayerController->GetHUD();
+
+		if(Hud)
+		{
+			if(ARHUD* ARHud = Cast<ARHUD>(Hud))
+			{
+				if(ARHud)
+				{
+					ARHud->InteractableInventory->SetVisibility(ESlateVisibility::Hidden);
+				}
+			}
+		}
+	}
 }
 
 void URInventoryComponent::Server_ChangeItemFromInventory_Implementation(FItemData OldItemData, FItemData NewItemData)

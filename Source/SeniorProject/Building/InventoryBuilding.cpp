@@ -33,6 +33,7 @@ void AInventoryBuilding::Interact(ASeniorProjectCharacter* Player)
 			bOpened = true;
 			Server_OpenInventory(Player);
 			Player->Server_SetItemOwnership(this);
+			InteractedPlayer = Player;
 		}
 	}
 }

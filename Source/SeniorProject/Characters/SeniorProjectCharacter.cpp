@@ -11,6 +11,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "TimerManager.h"
 #include "Engine/SkeletalMeshSocket.h"
+#include "Net/UnrealNetwork.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "Perception/AISense_Sight.h"
 #include "SeniorProject/Building/InventoryBuilding.h"
@@ -135,6 +136,38 @@ float ASeniorProjectCharacter::TakeDamage(float DamageAmount, FDamageEvent const
 	return ActualDamage;
 }
 
+void ASeniorProjectCharacter::SetCharacterMesh(USkeletalMesh* NewMesh)
+{
+	if(!HasAuthority())
+	{
+		Server_SetCharacterMesh(NewMesh);
+	}
+	else
+	{
+		CharacterMesh = NewMesh;
+		OnRep_CharacterMesh();
+	}
+}
+
+void ASeniorProjectCharacter::Server_SetCharacterMesh_Implementation(USkeletalMesh* NewMesh)
+{
+	SetCharacterMesh(NewMesh);
+}
+
+void ASeniorProjectCharacter::Multicast_SetCharacterMesh_Implementation(USkeletalMesh* NewMesh)
+{
+	CharacterMesh = NewMesh;
+	GetMesh()->SetSkeletalMesh(NewMesh);
+}
+
+void ASeniorProjectCharacter::OnRep_CharacterMesh()
+{
+	if(CharacterMesh)
+	{
+		GetMesh()->SetSkeletalMesh(CharacterMesh);
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////
 // Input
 
@@ -182,7 +215,7 @@ void ASeniorProjectCharacter::Move(const FInputActionValue& Value)
 
 		// get right vector 
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-		
+
 		// add movement 
 		AddMovementInput(ForwardDirection, MovementVector.Y);
 		AddMovementInput(RightDirection, MovementVector.X);
@@ -384,16 +417,52 @@ void ASeniorProjectCharacter::Die()
 {
 	if(GetLocalRole() == ROLE_Authority)
 	{
-		bIsDead = true;
-		Multicast_Die();
-		AGameModeBase* GM = GetWorld()->GetAuthGameMode();
-		if(ASeniorProjectGameMode* GameMode = Cast<ASeniorProjectGameMode>(GM))
+		if(GetWorld())
 		{
-			GameMode->ReSpawn(GetController());
+			bIsDead = true;
+			FVector Start = GetActorLocation();
+			FVector End = Start - FVector(0, 0, 1000.0f);
+			FVector SpawnVector;
+			int EmptySlotCount = 0;
+			int bIsEmpty = false;
+			for(FItemData ItemData : InventoryComp->GetInventoryItems())
+			{
+				if(!ItemData.ItemClass)
+				{
+					EmptySlotCount++;
+					if(EmptySlotCount == InventoryComp->GetInventoryMaxSlotSize())
+					{
+						bIsEmpty = true;
+					}
+				}
+			}
+			if(!bIsEmpty)
+			{
+				FHitResult HitResult;
+				FCollisionQueryParams CollisionParams;
+				CollisionParams.AddIgnoredActor(GetOwner());
+
+				if(GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, CollisionParams))
+				{
+					SpawnVector = HitResult.Location;
+					AInventoryBuilding* Backpack = GetWorld()->SpawnActor<AInventoryBuilding>(
+						DroppedBackpack, SpawnVector, GetActorRotation());
+					for(FItemData CurrentItemData : InventoryComp->GetInventoryItems())
+					{
+						Backpack->InventoryComp->AddItem(CurrentItemData);
+					}
+				}
+			}
+			Multicast_Die();
+			AGameModeBase* GM = GetWorld()->GetAuthGameMode();
+			if(ASeniorProjectGameMode* GameMode = Cast<ASeniorProjectGameMode>(GM))
+			{
+				GameMode->ReSpawn(GetController());
+			}
+			//Start destroy timer to remove player actor from world
+			GetWorld()->GetTimerManager().SetTimer(DestroyHandle, this, &ASeniorProjectCharacter::CallDestroy,
+			                                       RespawnDuration, false);
 		}
-		//Start destroy timer to remove player actor from world
-		GetWorld()->GetTimerManager().SetTimer(DestroyHandle, this, &ASeniorProjectCharacter::CallDestroy,
-		                                       RespawnDuration, false);
 	}
 }
 
@@ -496,4 +565,13 @@ void ASeniorProjectCharacter::Client_CloseInventory_Implementation()
 			}
 		}
 	}
+}
+
+void ASeniorProjectCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	//Replicates to everyone
+	DOREPLIFETIME(ASeniorProjectCharacter, bIsDead);
+	DOREPLIFETIME(ASeniorProjectCharacter, CharacterMesh);
 }

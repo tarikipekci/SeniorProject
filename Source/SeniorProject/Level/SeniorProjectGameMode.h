@@ -6,6 +6,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "SeniorProjectGameMode.generated.h"
 
+class AInventoryBuilding;
 class ASpawnPoint;
 
 UCLASS(minimalapi)

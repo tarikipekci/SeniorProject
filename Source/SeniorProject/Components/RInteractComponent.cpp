@@ -3,7 +3,6 @@
 
 #include "RInteractComponent.h"
 
-#include "RInventoryComponent.h"
 #include "RLineTraceComponent.h"
 #include "Camera/CameraComponent.h"
 #include "SeniorProject/Building/InventoryBuilding.h"
@@ -37,6 +36,8 @@ void URInteractComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 
 bool URInteractComponent::PerformInteractCheck()
 {
+	if(Player->GetIsDead())
+		return false;
 	FVector Start = Player->InteractComp->GetComponentLocation();
 	FVector End = Start + Player->GetFollowCamera()->GetForwardVector() * InteractRange;
 	AActor* Actor = Player->LineTraceComp->LineTraceSingle(Start, End, INTERACTABLE_CHANNEL, false);
@@ -72,7 +73,7 @@ bool URInteractComponent::PerformInteractCheck()
 
 void URInteractComponent::Interact()
 {
-	if(DetectedInteractableActor && bIsInteracting)
+	if(DetectedInteractableActor && bIsInteracting && !Player->GetIsDead())
 	{
 		AItem* InteractableItem = Cast<AItem>(DetectedInteractableActor);
 		if(InteractableItem)
@@ -135,6 +136,6 @@ void URInteractComponent::Server_Interact_Implementation(AActor* Actor)
 				}
 			}
 		}
-	 Player->Client_CloseInteractionWidget();
+		Player->Client_CloseInteractionWidget();
 	}
 }
