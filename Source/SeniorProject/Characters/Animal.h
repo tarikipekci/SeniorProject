@@ -77,10 +77,10 @@ public:
 	void Server_ChangeMovementSpeed(float NewSpeed);
 
 private:
-	UPROPERTY()
+	UPROPERTY(EditAnywhere,meta=(AllowPrivateAccess="true"))
 	float WalkSpeed;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere,meta=(AllowPrivateAccess="true"))
 	float GallopSpeed;
 
 	UPROPERTY()

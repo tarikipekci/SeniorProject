@@ -26,6 +26,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetDamagingPlayer(ASeniorProjectCharacter* Player) {DamagingPlayer = Player;}
 
+	UFUNCTION(BlueprintCallable)
+	int GetCurrentHitPoints() const {return CurrentHitPoints;}
+
+	UFUNCTION(BlueprintCallable)
+	int GetMaxHitPoints() const {return MaxHitPoints;}
+
 	UFUNCTION(Server,Reliable)
 	void Server_WarnEnemyAI();
 	
