@@ -100,6 +100,12 @@ void URInventoryComponent::SwapItems(URInventoryComponent* TargetInventory, int 
 	{
 		if(Index1 >= 0 && Index1 < InventoryMaxSlotSize && Index2 >= 0 && Index2 < InventoryMaxSlotSize)
 		{
+			if(this != TargetInventory)
+			{
+				if(InventoryItems[Index1].ItemActor == EquippedItem)
+					return;
+			}
+
 			FItemData* Item1 = &InventoryItems[Index1];
 			FItemData* Item2 = &TargetInventory->InventoryItems[Index2];
 
