@@ -45,6 +45,7 @@ EBTNodeResult::Type UBTTask_FindEscapePoint::ExecuteTask(UBehaviorTreeComponent&
 		}
 		else
 		{
+			OwnerComp.GetBlackboardComponent()->SetValueAsBool("CanSeePlayer", false);
 			return EBTNodeResult::Failed;
 		}
 	}
