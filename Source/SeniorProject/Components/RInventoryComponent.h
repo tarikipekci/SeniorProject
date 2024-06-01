@@ -96,6 +96,12 @@ public:
 	UFUNCTION(Client, Reliable)
 	void Client_HideInventoryWidget(ASeniorProjectCharacter* OwningPlayer);
 
+	UFUNCTION(BlueprintCallable)
+	void UseBuildingMaterials(TArray<TSubclassOf<AItem>> MaterialType, TArray<int> MaterialAmount);
+
+	UFUNCTION(BlueprintCallable)
+	void Server_UseBuildingMaterials(TArray<TSubclassOf<AItem>> MaterialType, TArray<int> MaterialAmount);
+
 private:
 	UPROPERTY()
 	ASeniorProjectCharacter* Player;

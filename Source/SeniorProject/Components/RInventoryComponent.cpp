@@ -282,6 +282,49 @@ void URInventoryComponent::ChangeItemFromInventory(FItemData& OldItemData, FItem
 	OnRep_InventoryUpdated();
 }
 
+void URInventoryComponent::UseBuildingMaterials(TArray<TSubclassOf<AItem>> MaterialType, TArray<int> MaterialAmount)
+{
+	if(Player->HasAuthority())
+	{
+		for(int i = 0; i < MaterialType.Num(); ++i)
+		{
+			TSubclassOf<AItem> CurrentMaterialClass = MaterialType[i];
+			AItem* CurrentMaterial = CurrentMaterialClass.GetDefaultObject();
+			FItemData CurrentMaterialData = CurrentMaterial->ItemData;
+			int RequiredAmount = MaterialAmount[i];
+			for(FItemData& ItemData : InventoryItems)
+			{
+				if(ItemData.ItemClass == CurrentMaterialData.ItemClass)
+				{
+					if(RequiredAmount <= ItemData.CurrentStackCount)
+					{
+						ItemData.CurrentStackCount -= RequiredAmount;
+
+						if(ItemData.CurrentStackCount <= 0)
+						{
+							ItemData = FItemData();
+						}
+						break;
+					}
+					RequiredAmount -= ItemData.CurrentStackCount;
+					ItemData = FItemData();
+				}
+			}
+		}
+	}
+	else
+	{
+		Server_UseBuildingMaterials(MaterialType, MaterialAmount);
+	}
+	OnRep_InventoryUpdated();
+}
+
+void URInventoryComponent::Server_UseBuildingMaterials(TArray<TSubclassOf<AItem>> MaterialType,
+                                                       TArray<int> MaterialAmount)
+{
+	UseBuildingMaterials(MaterialType, MaterialAmount);
+}
+
 void URInventoryComponent::Client_HideInventoryWidget_Implementation(ASeniorProjectCharacter* OwningPlayer)
 {
 	APlayerController* PlayerController = Cast<APlayerController>(OwningPlayer->GetController());
