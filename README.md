@@ -1,6 +1,8 @@
 # SeniorProject
 Co-op Survival Game 
 
+Gameplay Video: https://youtu.be/dJnaBSvdEOo
+
 LOGIN SCREEN
 ![image](https://github.com/tarikipekci/SeniorProject/assets/100356709/4a90ecea-c2dd-48b5-8c49-adc43bfa0518)
 
